@@ -149,6 +149,16 @@ def login():
             session['username'] = user['username']
             session['role'] = user['role']
             session['full_name'] = user['full_name']
+
+            # Record last login timestamp
+            try:
+                up_conn = get_db()
+                up_conn.execute("UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = ?", (user['id'],))
+                up_conn.commit()
+                up_conn.close()
+            except Exception as e:
+                print("Notice updating last_login:", e)
+
             flash(f'Welcome back, {user["full_name"]}!', 'success')
             next_url = request.args.get('next')
             return redirect(next_url or url_for('dashboard'))

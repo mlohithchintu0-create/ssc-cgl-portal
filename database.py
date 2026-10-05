@@ -25,9 +25,14 @@ def init_db():
         role TEXT DEFAULT 'user',
         full_name TEXT NOT NULL,
         target_year INTEGER DEFAULT 2025,
+        last_login TIMESTAMP,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
     """)
+    try:
+        cursor.execute("ALTER TABLE users ADD COLUMN last_login TIMESTAMP")
+    except Exception:
+        pass
 
     # Subjects table
     cursor.execute("""

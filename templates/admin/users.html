@@ -36,6 +36,7 @@
                         <th class="p-4 text-center">Completed Mocks</th>
                         <th class="p-4 text-center">Best Score</th>
                         <th class="p-4 text-center">Avg %</th>
+                        <th class="p-4 text-center">Last Logged In</th>
                         <th class="p-4 text-right">Joined</th>
                     </tr>
                 </thead>
@@ -71,6 +72,16 @@
                         </td>
                         <td class="p-4 text-center font-extrabold {% if u.avg_percentage >= 75 %}text-emerald-600{% elif u.avg_percentage >= 50 %}text-blue-600{% else %}text-slate-600{% endif %}">
                             {{ "%.1f"|format(u.avg_percentage) }}%
+                        </td>
+                        <td class="p-4 text-center whitespace-nowrap text-slate-600 font-mono text-xs">
+                            {% if u.last_login %}
+                            <span class="text-emerald-700 font-semibold flex items-center justify-center gap-1">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                {{ u.last_login[:16] }}
+                            </span>
+                            {% else %}
+                            <span class="text-slate-400">Never</span>
+                            {% endif %}
                         </td>
                         <td class="p-4 text-right text-slate-500 font-mono text-xs">
                             {{ u.created_at[:10] if u.created_at else '-' }}
