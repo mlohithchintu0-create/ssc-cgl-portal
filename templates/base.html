@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}SSC CGL Mock Test Portal{% endblock %} | Official PYQ & Practice Platform</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        ssc: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            600: '#1d4ed8',
+                            700: '#1e40af',
+                            800: '#1e3a8a',
+                            900: '#0f172a',
+                        },
+                        correct: '#10b981',
+                        wrong: '#ef4444',
+                        review: '#f59e0b',
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+    </style>
+    {% block head %}{% endblock %}
+</head>
+<body class="flex flex-col min-h-screen text-slate-800 bg-slate-50 antialiased selection:bg-blue-600 selection:text-white">
+
+    <!-- Top Navigation Header -->
+    <header class="sticky top-0 z-40 bg-ssc-900 border-b border-slate-800 text-white shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Brand / Logo -->
+                <div class="flex items-center space-x-3">
+                    <a href="{{ url_for('dashboard') if current_user else url_for('index') }}" class="flex items-center space-x-3 group">
+                        <div class="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center text-white shadow-inner group-hover:bg-blue-500 transition-colors">
+                            <i class="fa-solid fa-graduation-cap text-xl"></i>
+                        </div>
+                        <div>
+                            <div class="font-bold text-lg leading-tight tracking-tight flex items-center space-x-1.5">
+                                <span>SSC CGL</span>
+                                <span class="text-xs bg-blue-500/30 text-blue-300 font-semibold px-1.5 py-0.5 rounded border border-blue-400/20">PREP</span>
+                            </div>
+                            <p class="text-[11px] text-slate-400 font-normal leading-none">PYQ & Mock Test Engine</p>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Desktop Nav Links -->
+                {% if current_user %}
+                <nav class="hidden md:flex items-center space-x-1 text-sm font-medium">
+                    <a href="{{ url_for('dashboard') }}" class="px-3 py-2 rounded-md hover:bg-slate-800 text-slate-200 hover:text-white transition-colors flex items-center space-x-1.5 {% if request.endpoint == 'dashboard' %}bg-slate-800 text-white font-semibold{% endif %}">
+                        <i class="fa-solid fa-gauge-high text-xs text-blue-400"></i>
+                        <span>Dashboard</span>
+                    </a>
+                    <a href="{{ url_for('papers') }}" class="px-3 py-2 rounded-md hover:bg-slate-800 text-slate-200 hover:text-white transition-colors flex items-center space-x-1.5 {% if request.endpoint == 'papers' %}bg-slate-800 text-white font-semibold{% endif %}">
+                        <i class="fa-solid fa-book-open text-xs text-indigo-400"></i>
+                        <span>Previous Year Papers</span>
+                    </a>
+                    <a href="{{ url_for('my_results') }}" class="px-3 py-2 rounded-md hover:bg-slate-800 text-slate-200 hover:text-white transition-colors flex items-center space-x-1.5 {% if request.endpoint == 'my_results' %}bg-slate-800 text-white font-semibold{% endif %}">
+                        <i class="fa-solid fa-chart-line text-xs text-emerald-400"></i>
+                        <span>My Results</span>
+                    </a>
+                    <a href="{{ url_for('analytics') }}" class="px-3 py-2 rounded-md hover:bg-slate-800 text-slate-200 hover:text-white transition-colors flex items-center space-x-1.5 {% if request.endpoint == 'analytics' %}bg-slate-800 text-white font-semibold{% endif %}">
+                        <i class="fa-solid fa-chart-pie text-xs text-amber-400"></i>
+                        <span>Analytics</span>
+                    </a>
+                    {% if current_user.role == 'admin' %}
+                    <a href="{{ url_for('admin_dashboard') }}" class="px-3 py-2 rounded-md bg-amber-500/10 border border-amber-500/30 text-amber-300 hover:bg-amber-500/20 transition-colors flex items-center space-x-1.5">
+                        <i class="fa-solid fa-shield-halved text-xs"></i>
+                        <span>Admin Panel</span>
+                    </a>
+                    {% endif %}
+                </nav>
+
+                <!-- User profile & Logout -->
+                <div class="hidden md:flex items-center space-x-3">
+                    <a href="{{ url_for('profile') }}" class="flex items-center space-x-2 text-sm text-slate-300 hover:text-white bg-slate-800/60 px-3 py-1.5 rounded-lg border border-slate-700 hover:border-slate-600 transition-all">
+                        <div class="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center text-xs font-bold text-white uppercase">
+                            {{ current_user.username[0] }}
+                        </div>
+                        <span class="max-w-[120px] truncate font-medium">{{ current_user.full_name }}</span>
+                    </a>
+                    <a href="{{ url_for('logout') }}" title="Logout" class="text-slate-400 hover:text-rose-400 p-2 rounded-lg hover:bg-slate-800 transition-colors">
+                        <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                    </a>
+                </div>
+                {% else %}
+                <!-- Auth CTA for Guests -->
+                <div class="hidden md:flex items-center space-x-3 text-sm">
+                    <a href="{{ url_for('login') }}" class="px-4 py-2 text-slate-300 hover:text-white font-medium hover:underline">
+                        Sign In
+                    </a>
+                    <a href="{{ url_for('signup') }}" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-lg shadow-sm transition-all flex items-center space-x-1.5">
+                        <i class="fa-solid fa-user-plus text-xs"></i>
+                        <span>Create Account</span>
+                    </a>
+                </div>
+                {% endif %}
+
+                <!-- Mobile menu button -->
+                <div class="flex items-center md:hidden">
+                    <button id="mobile-menu-btn" type="button" class="text-slate-400 hover:text-white p-2 rounded-md hover:bg-slate-800 focus:outline-none">
+                        <i class="fa-solid fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Drawer -->
+        <div id="mobile-menu" class="hidden md:hidden border-t border-slate-800 bg-ssc-900 px-4 pt-2 pb-4 space-y-1">
+            {% if current_user %}
+            <div class="py-2 border-b border-slate-800 mb-2">
+                <p class="text-xs text-slate-400">Signed in as</p>
+                <p class="font-semibold text-white truncate">{{ current_user.full_name }} ({{ current_user.username }})</p>
+            </div>
+            <a href="{{ url_for('dashboard') }}" class="block px-3 py-2 rounded-md text-base font-medium text-slate-200 hover:bg-slate-800">
+                <i class="fa-solid fa-gauge-high mr-2 text-blue-400"></i> Dashboard
+            </a>
+            <a href="{{ url_for('papers') }}" class="block px-3 py-2 rounded-md text-base font-medium text-slate-200 hover:bg-slate-800">
+                <i class="fa-solid fa-book-open mr-2 text-indigo-400"></i> Previous Year Papers
+            </a>
+            <a href="{{ url_for('my_results') }}" class="block px-3 py-2 rounded-md text-base font-medium text-slate-200 hover:bg-slate-800">
+                <i class="fa-solid fa-chart-line mr-2 text-emerald-400"></i> My Results
+            </a>
+            <a href="{{ url_for('analytics') }}" class="block px-3 py-2 rounded-md text-base font-medium text-slate-200 hover:bg-slate-800">
+                <i class="fa-solid fa-chart-pie mr-2 text-amber-400"></i> Performance Analytics
+            </a>
+            <a href="{{ url_for('profile') }}" class="block px-3 py-2 rounded-md text-base font-medium text-slate-200 hover:bg-slate-800">
+                <i class="fa-solid fa-user-circle mr-2 text-slate-400"></i> Profile
+            </a>
+            {% if current_user.role == 'admin' %}
+            <a href="{{ url_for('admin_dashboard') }}" class="block px-3 py-2 rounded-md text-base font-medium text-amber-300 bg-amber-500/10">
+                <i class="fa-solid fa-shield-halved mr-2"></i> Admin Panel
+            </a>
+            {% endif %}
+            <a href="{{ url_for('logout') }}" class="block px-3 py-2 rounded-md text-base font-medium text-rose-400 hover:bg-slate-800">
+                <i class="fa-solid fa-arrow-right-from-bracket mr-2"></i> Logout
+            </a>
+            {% else %}
+            <a href="{{ url_for('login') }}" class="block px-3 py-2 rounded-md text-base font-medium text-slate-200 hover:bg-slate-800">
+                Sign In
+            </a>
+            <a href="{{ url_for('signup') }}" class="block px-3 py-2 rounded-md text-base font-medium text-blue-400 hover:bg-slate-800">
+                Create Account
+            </a>
+            {% endif %}
+        </div>
+    </header>
+
+    <!-- Flash Messages Container -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 w-full">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                <div class="flex items-center justify-between p-4 mb-3 rounded-lg shadow-sm text-sm border 
+                    {% if category == 'success' %} bg-emerald-50 text-emerald-900 border-emerald-200
+                    {% elif category == 'danger' %} bg-rose-50 text-rose-900 border-rose-200
+                    {% elif category == 'warning' %} bg-amber-50 text-amber-900 border-amber-200
+                    {% else %} bg-blue-50 text-blue-900 border-blue-200 {% endif %}">
+                    <div class="flex items-center space-x-2">
+                        <i class="fa-solid 
+                            {% if category == 'success' %} fa-circle-check text-emerald-600
+                            {% elif category == 'danger' %} fa-circle-exclamation text-rose-600
+                            {% elif category == 'warning' %} fa-triangle-exclamation text-amber-600
+                            {% else %} fa-circle-info text-blue-600 {% endif %}"></i>
+                        <span>{{ message }}</span>
+                    </div>
+                    <button type="button" onclick="this.parentElement.remove()" class="text-slate-400 hover:text-slate-600">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Main Content Body -->
+    <main class="flex-grow">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 text-slate-500 text-xs py-6 mt-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center space-x-2">
+                <i class="fa-solid fa-award text-blue-600"></i>
+                <span class="font-medium text-slate-700">SSC CGL Mock Test & Previous Year Papers Portal</span>
+                <span>• Accurate Solutions & Configurable Marking Schemes</span>
+            </div>
+            <div class="flex items-center space-x-4">
+                <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded bg-slate-100 text-slate-600 border border-slate-200">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                    <span>SSC CGL Pattern (Tier 1 & 2)</span>
+                </span>
+                <span>© {{ current_year }} SSC Exam Prep. All rights reserved.</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Mobile Drawer Toggle Script -->
+    <script>
+        document.getElementById('mobile-menu-btn')?.addEventListener('click', function() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        });
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

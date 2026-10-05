@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}User Directory - Admin Portal{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+        <div>
+            <nav class="flex items-center space-x-2 text-xs text-slate-500 mb-2">
+                <a href="{{ url_for('admin_dashboard') }}" class="hover:text-blue-600">Admin</a>
+                <span>/</span>
+                <span class="text-slate-800 font-semibold">User Directory</span>
+            </nav>
+            <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">
+                Aspirant Directory & Performance Log
+            </h1>
+            <p class="text-xs sm:text-sm text-slate-600 mt-1">
+                View registered students, roles, total test attempts, average percentage, and best marks.
+            </p>
+        </div>
+    </div>
+
+    <!-- Users Table -->
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs sm:text-sm">
+                <thead>
+                    <tr class="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold uppercase tracking-wider text-[11px]">
+                        <th class="p-4">ID</th>
+                        <th class="p-4">Full Name</th>
+                        <th class="p-4">Username / Email</th>
+                        <th class="p-4 text-center">Role</th>
+                        <th class="p-4 text-center">Target Year</th>
+                        <th class="p-4 text-center">Completed Mocks</th>
+                        <th class="p-4 text-center">Best Score</th>
+                        <th class="p-4 text-center">Avg %</th>
+                        <th class="p-4 text-right">Joined</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    {% for u in users %}
+                    <tr class="hover:bg-slate-50/70 transition-colors">
+                        <td class="p-4 font-mono text-slate-400 text-xs">#{{ u.id }}</td>
+                        <td class="p-4 font-bold text-slate-900 flex items-center space-x-2.5">
+                            <div class="w-7 h-7 rounded-full bg-ssc-900 text-white flex items-center justify-center font-bold text-xs uppercase">
+                                {{ u.username[0] }}
+                            </div>
+                            <span>{{ u.full_name }}</span>
+                        </td>
+                        <td class="p-4">
+                            <span class="font-medium text-slate-800 block">@{{ u.username }}</span>
+                            <span class="text-[11px] text-slate-400 block">{{ u.email }}</span>
+                        </td>
+                        <td class="p-4 text-center">
+                            {% if u.role == 'admin' %}
+                            <span class="px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200 font-bold text-xs">Admin</span>
+                            {% else %}
+                            <span class="px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200 font-semibold text-xs">Aspirant</span>
+                            {% endif %}
+                        </td>
+                        <td class="p-4 text-center font-semibold text-slate-700">
+                            SSC CGL {{ u.target_year or 2025 }}
+                        </td>
+                        <td class="p-4 text-center font-bold text-slate-900">
+                            {{ u.attempts_count }}
+                        </td>
+                        <td class="p-4 text-center font-bold text-emerald-600">
+                            {{ u.best_score or '-' }}
+                        </td>
+                        <td class="p-4 text-center font-extrabold {% if u.avg_percentage >= 75 %}text-emerald-600{% elif u.avg_percentage >= 50 %}text-blue-600{% else %}text-slate-600{% endif %}">
+                            {{ "%.1f"|format(u.avg_percentage) }}%
+                        </td>
+                        <td class="p-4 text-right text-slate-500 font-mono text-xs">
+                            {{ u.created_at[:10] if u.created_at else '-' }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

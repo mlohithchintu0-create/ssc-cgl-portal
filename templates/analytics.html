@@ -1,0 +1,263 @@
+{% extends "base.html" %}
+
+{% block title %}Performance Analytics & Subject Accuracy - SSC CGL Portal{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    
+    <!-- Header -->
+    <div class="mb-8">
+        <div class="flex items-center space-x-2 text-xs font-semibold text-blue-600 uppercase tracking-wider mb-1">
+            <i class="fa-solid fa-chart-line"></i>
+            <span>Learning & Accuracy Analytics</span>
+        </div>
+        <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">
+            Performance Analytics
+        </h1>
+        <p class="text-xs sm:text-sm text-slate-600 mt-1 max-w-2xl">
+            Detailed breakdown across General Intelligence, General Awareness, Quantitative Aptitude, and English Comprehension to guide your daily revision strategy.
+        </p>
+    </div>
+
+    <!-- Summary KPI Cards (Section 13) -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+            <span class="text-xs text-slate-500 font-medium block">Average Net Score</span>
+            <div class="text-2xl font-black text-slate-900 mt-1">
+                {{ "%.1f"|format(summary.avg_score or 0) }}
+            </div>
+            <span class="text-[11px] text-slate-400 block mt-0.5">Across all completed mocks</span>
+        </div>
+
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+            <span class="text-xs text-slate-500 font-medium block">Best Recorded Score</span>
+            <div class="text-2xl font-black text-emerald-600 mt-1">
+                {{ "%.1f"|format(summary.best_score or 0) }}
+            </div>
+            <span class="text-[11px] text-emerald-700 block mt-0.5">Personal best mark</span>
+        </div>
+
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+            <span class="text-xs text-slate-500 font-medium block">Strongest Subject</span>
+            <div class="text-base font-bold text-blue-700 mt-1 truncate" title="{{ strong_subject }}">
+                {{ strong_subject }}
+            </div>
+            <span class="text-[11px] text-slate-400 block mt-0.5">Highest accuracy rate</span>
+        </div>
+
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+            <span class="text-xs text-slate-500 font-medium block">Weak Subject Area</span>
+            <div class="text-base font-bold text-rose-700 mt-1 truncate" title="{{ weak_subject }}">
+                {{ weak_subject }}
+            </div>
+            <span class="text-[11px] text-rose-600 block mt-0.5">Needs concept revision</span>
+        </div>
+    </div>
+
+    <!-- Visual Charts Row -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
+        <!-- Chart 1: Score Progression History (7 Cols) -->
+        <div class="lg:col-span-7 bg-white rounded-2xl border border-slate-200 p-6 shadow-sm flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h3 class="font-bold text-slate-900 text-base">Test Score Progression</h3>
+                    <p class="text-xs text-slate-500">Historical net score trend across tests</p>
+                </div>
+                <span class="text-xs font-semibold px-2.5 py-1 rounded bg-blue-50 text-blue-700">Chronological</span>
+            </div>
+            <div class="h-64 relative">
+                <canvas id="scoreProgressionChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Chart 2: Correct vs Wrong Ratio (5 Cols) -->
+        <div class="lg:col-span-5 bg-white rounded-2xl border border-slate-200 p-6 shadow-sm flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h3 class="font-bold text-slate-900 text-base">Accuracy Ratio</h3>
+                    <p class="text-xs text-slate-500">Correct vs Wrong vs Skipped</p>
+                </div>
+            </div>
+            <div class="h-64 relative flex items-center justify-center">
+                <canvas id="accuracyDonutChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Subject-Wise Detailed Table (Section 13 Requirement) -->
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden mb-8">
+        <div class="p-6 border-b border-slate-100 flex items-center justify-between">
+            <div>
+                <h3 class="font-bold text-slate-900 text-base">Sectional Accuracy & Subject Mastery</h3>
+                <p class="text-xs text-slate-500">Evaluated across all test sessions</p>
+            </div>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs sm:text-sm">
+                <thead>
+                    <tr class="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold">
+                        <th class="p-4">Subject</th>
+                        <th class="p-4 text-center">Questions Faced</th>
+                        <th class="p-4 text-center">Correct Answers</th>
+                        <th class="p-4 text-center">Wrong Answers</th>
+                        <th class="p-4 text-center">Accuracy %</th>
+                        <th class="p-4 text-right">Mastery Level</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    {% for sub in subject_stats %}
+                    {% set att = sub.correct_count + sub.wrong_count %}
+                    {% set acc = (sub.correct_count / att * 100) if att > 0 else 0 %}
+                    <tr class="hover:bg-slate-50/60 transition-colors">
+                        <td class="p-4 font-bold text-slate-900 flex items-center space-x-2">
+                            <span class="w-6 h-6 rounded bg-ssc-900 text-white flex items-center justify-center text-[10px] font-bold">
+                                {{ sub.subject_code }}
+                            </span>
+                            <span>{{ sub.subject_name }}</span>
+                        </td>
+                        <td class="p-4 text-center font-medium text-slate-700">{{ sub.total_questions }}</td>
+                        <td class="p-4 text-center font-bold text-emerald-600">{{ sub.correct_count }}</td>
+                        <td class="p-4 text-center font-bold text-rose-600">{{ sub.wrong_count }}</td>
+                        <td class="p-4 text-center font-extrabold {% if acc >= 75 %}text-emerald-600{% elif acc >= 50 %}text-blue-600{% else %}text-amber-600{% endif %}">
+                            {{ "%.1f"|format(acc) }}%
+                        </td>
+                        <td class="p-4 text-right">
+                            {% if acc >= 80 %}
+                            <span class="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold text-xs">Strong</span>
+                            {% elif acc >= 60 %}
+                            <span class="px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200 font-bold text-xs">Moderate</span>
+                            {% else %}
+                            <span class="px-2.5 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200 font-bold text-xs">Weak Area</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Topic-Wise Performance Breakdown (Section 13 Requirement) -->
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+        <h3 class="font-bold text-slate-900 text-base mb-1">Topic-Wise Performance</h3>
+        <p class="text-xs text-slate-500 mb-4">Granular accuracy by syllabus chapters</p>
+
+        {% if topic_stats %}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {% for t in topic_stats %}
+            {% set total = t.total_q %}
+            {% set correct = t.correct_q %}
+            {% set acc = (correct / total * 100) if total > 0 else 0 %}
+            <div class="p-4 rounded-xl border border-slate-200 bg-slate-50/50">
+                <div class="flex items-center justify-between text-xs mb-1">
+                    <span class="text-slate-400 font-medium">{{ t.subject_name }}</span>
+                    <span class="font-bold {% if acc >= 75 %}text-emerald-600{% elif acc >= 50 %}text-blue-600{% else %}text-amber-600{% endif %}">
+                        {{ "%.0f"|format(acc) }}%
+                    </span>
+                </div>
+                <div class="font-bold text-slate-900 text-sm truncate" title="{{ t.topic }}">{{ t.topic }}</div>
+                <div class="flex items-center justify-between text-[11px] text-slate-500 mt-2">
+                    <span>Solved: {{ total }}</span>
+                    <span>Correct: {{ correct }}</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-xs text-slate-500 text-center py-6">Attempt more mock papers to reveal topic-level granularity.</p>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Prepare data for Chart.js
+    const historyData = [
+        {% for h in history %}
+        {
+            label: "Test #{{ h.id }} ({{ h.year }})",
+            score: {{ h.final_score }},
+            maxMarks: {{ h.max_marks }}
+        },
+        {% endfor %}
+    ];
+
+    // Score Progression Line Chart
+    const ctxScore = document.getElementById('scoreProgressionChart')?.getContext('2d');
+    if (ctxScore) {
+        new Chart(ctxScore, {
+            type: 'line',
+            data: {
+                labels: historyData.map(h => h.label),
+                datasets: [{
+                    label: 'Net Score',
+                    data: historyData.map(h => h.score),
+                    borderColor: '#2563eb',
+                    backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                    borderWidth: 2.5,
+                    fill: true,
+                    tension: 0.3,
+                    pointBackgroundColor: '#1d4ed8',
+                    pointRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: '#f1f5f9' }
+                    },
+                    x: {
+                        grid: { display: false }
+                    }
+                }
+            }
+        });
+    }
+
+    // Correct vs Wrong Donut Chart
+    let totalCorrect = 0;
+    let totalWrong = 0;
+    let totalUnanswered = 0;
+
+    {% for sub in subject_stats %}
+        totalCorrect += {{ sub.correct_count }};
+        totalWrong += {{ sub.wrong_count }};
+        totalUnanswered += {{ sub.unanswered_count }};
+    {% endfor %}
+
+    const ctxDonut = document.getElementById('accuracyDonutChart')?.getContext('2d');
+    if (ctxDonut) {
+        new Chart(ctxDonut, {
+            type: 'doughnut',
+            data: {
+                labels: ['Correct', 'Wrong', 'Unanswered'],
+                datasets: [{
+                    data: [totalCorrect, totalWrong, totalUnanswered],
+                    backgroundColor: ['#10b981', '#ef4444', '#cbd5e1'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { boxWidth: 12, font: { size: 11 } }
+                    }
+                },
+                cutout: '70%'
+            }
+        });
+    }
+</script>
+{% endblock %}

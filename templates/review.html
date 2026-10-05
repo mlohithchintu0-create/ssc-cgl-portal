@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+
+{% block title %}Review Answers: {{ attempt.paper_title }} - SSC CGL Portal{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    
+    <!-- Top Header & Breadcrumb -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+        <div>
+            <nav class="flex items-center space-x-2 text-xs text-slate-500 mb-2">
+                <a href="{{ url_for('dashboard') }}" class="hover:text-blue-600">Dashboard</a>
+                <span>/</span>
+                <a href="{{ url_for('test_result', attempt_id=attempt.id) }}" class="hover:text-blue-600">Result</a>
+                <span>/</span>
+                <span class="text-slate-800 font-semibold">Answer Key & Review</span>
+            </nav>
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+                Detailed Answer Review
+            </h1>
+            <p class="text-xs sm:text-sm text-slate-600 mt-0.5">
+                {{ attempt.paper_title }} • Score: <strong>{{ attempt.final_score }} / {{ attempt.max_marks }}</strong> ({{ attempt.percentage }}%)
+            </p>
+        </div>
+
+        <div class="flex items-center space-x-2">
+            <a href="{{ url_for('test_result', attempt_id=attempt.id) }}" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl border border-slate-300 transition-colors">
+                ← Back to Scorecard
+            </a>
+            <a href="{{ url_for('take_test', paper_id=attempt.paper_id) }}" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl shadow-sm transition-colors">
+                Retake Paper
+            </a>
+        </div>
+    </div>
+
+    <!-- Filter Buttons (Section 12: All, Correct, Wrong, Unanswered) -->
+    <div class="bg-white rounded-2xl border border-slate-200 p-4 mb-8 shadow-sm flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center space-x-2 text-xs">
+            <span class="text-slate-500 font-semibold mr-1">Filter by Status:</span>
+            <a href="{{ url_for('test_review', attempt_id=attempt.id, filter='all') }}" 
+               class="px-3.5 py-1.5 rounded-lg font-bold transition-colors {% if current_filter == 'all' %}bg-ssc-900 text-white shadow-sm{% else %}bg-slate-100 text-slate-700 hover:bg-slate-200{% endif %}">
+                All ({{ total_count }})
+            </a>
+            <a href="{{ url_for('test_review', attempt_id=attempt.id, filter='correct') }}" 
+               class="px-3.5 py-1.5 rounded-lg font-bold transition-colors {% if current_filter == 'correct' %}bg-emerald-600 text-white shadow-sm{% else %}bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100{% endif %}">
+                <i class="fa-solid fa-check text-[10px] mr-1"></i> Correct ({{ attempt.correct_answers }})
+            </a>
+            <a href="{{ url_for('test_review', attempt_id=attempt.id, filter='wrong') }}" 
+               class="px-3.5 py-1.5 rounded-lg font-bold transition-colors {% if current_filter == 'wrong' %}bg-rose-600 text-white shadow-sm{% else %}bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100{% endif %}">
+                <i class="fa-solid fa-xmark text-[10px] mr-1"></i> Wrong ({{ attempt.wrong_answers }})
+            </a>
+            <a href="{{ url_for('test_review', attempt_id=attempt.id, filter='unanswered') }}" 
+               class="px-3.5 py-1.5 rounded-lg font-bold transition-colors {% if current_filter == 'unanswered' %}bg-slate-700 text-white shadow-sm{% else %}bg-slate-100 text-slate-700 hover:bg-slate-200{% endif %}">
+                Unanswered ({{ attempt.unanswered_questions }})
+            </a>
+        </div>
+
+        <div class="text-xs text-slate-500 font-medium">
+            Showing {{ questions|length }} Question{{ 's' if questions|length != 1 else '' }}
+        </div>
+    </div>
+
+    <!-- Questions Review Feed -->
+    {% if questions %}
+    <div class="space-y-6">
+        {% for q in questions %}
+        <div class="bg-white rounded-2xl border border-slate-200 p-6 sm:p-7 shadow-sm transition-all hover:border-slate-300">
+            <!-- Header Question Meta -->
+            <div class="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-slate-100 mb-4">
+                <div class="flex items-center space-x-2">
+                    <span class="w-7 h-7 rounded-lg bg-ssc-900 text-white flex items-center justify-center font-bold text-xs">
+                        Q{{ q.order_num }}
+                    </span>
+                    <span class="text-xs font-semibold px-2.5 py-0.5 rounded bg-slate-100 text-slate-700">
+                        {{ q.subject_name }}
+                    </span>
+                    <span class="text-xs px-2 py-0.5 rounded bg-slate-100 text-slate-600">
+                        {{ q.topic or 'General' }}
+                    </span>
+                </div>
+
+                <div class="flex items-center space-x-2">
+                    <!-- Status Badge -->
+                    {% if q.status == 'correct' %}
+                    <span class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold text-xs flex items-center space-x-1">
+                        <i class="fa-solid fa-circle-check text-emerald-600"></i>
+                        <span>Correct (+{{ attempt.marks_per_question }})</span>
+                    </span>
+                    {% elif q.status == 'wrong' %}
+                    <span class="px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-800 font-bold text-xs flex items-center space-x-1">
+                        <i class="fa-solid fa-circle-xmark text-rose-600"></i>
+                        <span>Incorrect (-{{ attempt.negative_marks }})</span>
+                    </span>
+                    {% else %}
+                    <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 font-semibold text-xs flex items-center space-x-1">
+                        <i class="fa-regular fa-circle"></i>
+                        <span>Unanswered (0.0)</span>
+                    </span>
+                    {% endif %}
+
+                    <!-- Provenance Badge -->
+                    {% if q.question_type == 'official_pyq' %}
+                    <span class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 text-[11px] font-semibold">
+                        Official PYQ
+                    </span>
+                    {% else %}
+                    <span class="px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-200 text-[11px] font-semibold">
+                        Model Question
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Question Text -->
+            <div class="text-base font-medium text-slate-900 leading-relaxed whitespace-pre-line mb-4">
+                {{ q.question_text }}
+            </div>
+
+            {% if q.question_image %}
+            <div class="my-3 max-w-md">
+                <img src="{{ q.question_image }}" alt="Question Image" class="rounded-lg border border-slate-200 shadow-sm max-h-60">
+            </div>
+            {% endif %}
+
+            <!-- 4 Options Review Grid -->
+            <div class="space-y-2.5 mb-5">
+                {% set opts = [('A', q.option_a), ('B', q.option_b), ('C', q.option_c), ('D', q.option_d)] %}
+                {% for key, val in opts %}
+                    {% set is_selected = (q.selected_option == key) %}
+                    {% set is_official_correct = (q.correct_option == key) %}
+
+                    <div class="p-3.5 rounded-xl border flex items-center space-x-3 
+                        {% if is_official_correct %} bg-emerald-50 border-emerald-500 text-emerald-950 font-medium
+                        {% elif is_selected and not is_official_correct %} bg-rose-50 border-rose-400 text-rose-950 font-medium
+                        {% else %} bg-slate-50/60 border-slate-200 text-slate-700 {% endif %}">
+                        
+                        <div class="w-7 h-7 rounded-lg flex items-center justify-center font-bold text-xs border 
+                            {% if is_official_correct %} bg-emerald-600 text-white border-emerald-600
+                            {% elif is_selected and not is_official_correct %} bg-rose-600 text-white border-rose-600
+                            {% else %} bg-white text-slate-700 border-slate-300 {% endif %}">
+                            {{ key }}
+                        </div>
+
+                        <div class="text-sm flex-grow">
+                            {{ val }}
+                        </div>
+
+                        <!-- Indicator tags -->
+                        {% if is_official_correct and is_selected %}
+                        <span class="text-xs font-bold text-emerald-700 flex items-center space-x-1">
+                            <i class="fa-solid fa-check"></i>
+                            <span>Your Answer & Official Correct</span>
+                        </span>
+                        {% elif is_official_correct %}
+                        <span class="text-xs font-bold text-emerald-700 flex items-center space-x-1">
+                            <i class="fa-solid fa-check"></i>
+                            <span>Correct Answer</span>
+                        </span>
+                        {% elif is_selected %}
+                        <span class="text-xs font-bold text-rose-600 flex items-center space-x-1">
+                            <i class="fa-solid fa-xmark"></i>
+                            <span>Your Chosen Answer</span>
+                        </span>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+
+            <!-- Explanation Box (Section 12: Detailed Solution Rationale) -->
+            <div class="bg-blue-50/80 border border-blue-200 rounded-xl p-4 text-xs text-blue-950">
+                <div class="flex items-center space-x-1.5 font-bold text-blue-900 mb-1.5 text-sm">
+                    <i class="fa-solid fa-lightbulb text-blue-600"></i>
+                    <span>Official Solution & Explanation:</span>
+                </div>
+                <div class="leading-relaxed whitespace-pre-line text-slate-800 text-xs sm:text-[13px]">
+                    {{ q.explanation or 'Official SSC CGL answer key confirmed. No supplementary note provided.' }}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="bg-white rounded-2xl border border-slate-200 p-12 text-center">
+        <div class="w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-3">
+            <i class="fa-solid fa-filter text-xl"></i>
+        </div>
+        <h4 class="font-bold text-slate-900 text-base">No questions found in this category</h4>
+        <p class="text-xs text-slate-500 mt-1">Try switching filters to 'All' to review every question.</p>
+        <a href="{{ url_for('test_review', attempt_id=attempt.id, filter='all') }}" class="inline-block mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg text-xs font-semibold">
+            Show All Questions
+        </a>
+    </div>
+    {% endif %}
+
+    <!-- Bottom Return CTA -->
+    <div class="mt-8 text-center">
+        <a href="{{ url_for('test_result', attempt_id=attempt.id) }}" class="inline-flex items-center space-x-2 px-6 py-2.5 bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold rounded-xl shadow-sm transition-colors">
+            <i class="fa-solid fa-arrow-left text-[10px]"></i>
+            <span>Return to Scorecard</span>
+        </a>
+    </div>
+</div>
+{% endblock %}

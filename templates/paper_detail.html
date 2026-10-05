@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+
+{% block title %}{{ paper.title }} - Paper Information & Instructions{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <!-- Breadcrumb -->
+    <nav class="flex items-center space-x-2 text-xs text-slate-500 mb-6">
+        <a href="{{ url_for('dashboard') }}" class="hover:text-blue-600">Dashboard</a>
+        <span>/</span>
+        <a href="{{ url_for('papers') }}" class="hover:text-blue-600">Previous Year Papers</a>
+        <span>/</span>
+        <span class="text-slate-800 font-semibold truncate">{{ paper.title }}</span>
+    </nav>
+
+    <!-- Main Card -->
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden mb-6">
+        <!-- Header -->
+        <div class="p-6 sm:p-8 bg-gradient-to-r from-ssc-900 to-slate-800 text-white">
+            <div class="flex flex-wrap items-center gap-2 mb-3">
+                <span class="px-2.5 py-0.5 rounded bg-blue-500/20 text-blue-200 border border-blue-400/30 text-xs font-bold">
+                    {{ paper.exam_name }}
+                </span>
+                <span class="px-2.5 py-0.5 rounded bg-slate-700/60 text-slate-200 border border-slate-600 text-xs font-semibold">
+                    Year: {{ paper.year }}
+                </span>
+                <span class="px-2.5 py-0.5 rounded bg-slate-700/60 text-slate-200 border border-slate-600 text-xs font-semibold">
+                    {{ paper.tier }} • {{ paper.shift }}
+                </span>
+                {% if paper.paper_type == 'official_pyq' %}
+                <span class="px-2.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 text-xs font-semibold">
+                    <i class="fa-solid fa-certificate mr-1"></i> Official Verified PYQ
+                </span>
+                {% else %}
+                <span class="px-2.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-400/30 text-xs font-semibold">
+                    <i class="fa-solid fa-wand-magic-sparkles mr-1"></i> Curated Model Mock
+                </span>
+                {% endif %}
+            </div>
+
+            <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
+                {{ paper.title }}
+            </h1>
+            <p class="text-slate-300 text-xs sm:text-sm mt-2 max-w-2xl font-light">
+                Source: {{ paper.source_attribution or 'Staff Selection Commission Examination Archive' }}
+            </p>
+        </div>
+
+        <!-- Specifications Grid (Section 5 Requirement) -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-slate-100 border-b border-slate-200 bg-slate-50/60">
+            <div class="p-5 text-center">
+                <span class="text-xs text-slate-500 font-medium block">Questions</span>
+                <span class="text-2xl font-black text-slate-900 mt-0.5 block">{{ paper.question_count }} Qs</span>
+                <span class="text-[11px] text-slate-500">Multiple Choice</span>
+            </div>
+            <div class="p-5 text-center">
+                <span class="text-xs text-slate-500 font-medium block">Maximum Marks</span>
+                <span class="text-2xl font-black text-blue-600 mt-0.5 block">{{ max_marks|round|int }}</span>
+                <span class="text-[11px] text-slate-500">+{{ paper.marks_per_question }} per correct</span>
+            </div>
+            <div class="p-5 text-center">
+                <span class="text-xs text-slate-500 font-medium block">Exam Duration</span>
+                <span class="text-2xl font-black text-slate-900 mt-0.5 block">{{ paper.duration_minutes }} Min</span>
+                <span class="text-[11px] text-slate-500">Timed Simulation</span>
+            </div>
+            <div class="p-5 text-center">
+                <span class="text-xs text-slate-500 font-medium block">Negative Marking</span>
+                <span class="text-2xl font-black text-rose-600 mt-0.5 block">-{{ paper.negative_marks }}</span>
+                <span class="text-[11px] text-slate-500">Per incorrect answer</span>
+            </div>
+        </div>
+
+        <!-- Sections Distribution -->
+        <div class="p-6 border-b border-slate-200">
+            <h3 class="font-bold text-slate-900 text-sm mb-3">Section Breakdown</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+                {% for sub in subject_distribution %}
+                <div class="p-3 bg-slate-50 rounded-xl border border-slate-200">
+                    <span class="text-xs font-semibold text-slate-800 block truncate">{{ sub.subject_name }}</span>
+                    <span class="text-xs text-slate-500 mt-0.5 block">{{ sub.count }} Questions</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Instructions (Section 5 Requirement) -->
+        <div class="p-6 sm:p-8 space-y-4">
+            <h3 class="font-bold text-slate-900 text-base flex items-center space-x-2">
+                <i class="fa-solid fa-list-ol text-blue-600"></i>
+                <span>Examination Instructions & Guidelines</span>
+            </h3>
+
+            <div class="bg-amber-50/70 border border-amber-200 rounded-xl p-4 text-xs text-amber-950 space-y-2">
+                <p class="font-bold text-amber-900">Please read the following instructions carefully before starting the test:</p>
+                <ol class="list-decimal pl-4 space-y-1.5 leading-relaxed">
+                    <li>The clock will be set at the server. The countdown timer at the top right of your screen will display the remaining time available for you to complete the examination.</li>
+                    <li>For every correct answer, <strong>+{{ paper.marks_per_question }} marks</strong> will be awarded.</li>
+                    <li>For every incorrect answer, <strong>-{{ paper.negative_marks }} marks</strong> will be deducted as negative marking. Unanswered questions will receive 0 marks.</li>
+                    <li><strong>Instant Feedback Mode:</strong> When you click <span class="bg-blue-100 text-blue-800 font-bold px-1 rounded">Submit Answer</span> for any question, the system will immediately display whether your answer is <span class="text-emerald-700 font-bold">✅ Correct</span> or <span class="text-rose-700 font-bold">❌ Wrong</span> along with the full explanation.</li>
+                    <li>You can also navigate freely between questions using the question palette, mark questions for review, or clear selections.</li>
+                    <li>When the timer expires, your test will be auto-submitted automatically. Do not close or refresh the tab during the active mock test.</li>
+                </ol>
+            </div>
+
+            {% if last_attempt %}
+            <!-- Previous Attempt Banner -->
+            <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                <div>
+                    <span class="font-bold text-blue-900">You previously attempted this paper.</span>
+                    <p class="text-blue-800 mt-0.5">
+                        Score: <strong>{{ last_attempt.final_score }} / {{ last_attempt.max_marks }}</strong> ({{ last_attempt.percentage }}%)
+                    </p>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <a href="{{ url_for('test_result', attempt_id=last_attempt.id) }}" class="px-3 py-1.5 bg-white text-blue-700 font-semibold rounded-lg border border-blue-200 hover:bg-blue-50">
+                        View Past Result
+                    </a>
+                    <a href="{{ url_for('test_review', attempt_id=last_attempt.id) }}" class="px-3 py-1.5 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700">
+                        Review Past Answers
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Start Test Button (Section 5 Requirement) -->
+            <div class="pt-4 flex flex-col sm:flex-row items-center justify-end gap-3 border-t border-slate-200">
+                <a href="{{ url_for('papers') }}" class="w-full sm:w-auto px-5 py-2.5 text-center text-slate-600 hover:text-slate-900 text-xs font-semibold">
+                    ← Back to Papers List
+                </a>
+                <a href="{{ url_for('take_test', paper_id=paper.id) }}" class="w-full sm:w-auto px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl shadow-md transition-all flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-play text-xs"></i>
+                    <span>Start Mock Test Now</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

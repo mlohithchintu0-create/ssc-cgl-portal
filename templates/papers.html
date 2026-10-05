@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+
+{% block title %}SSC CGL Previous Year Papers (2016 - 2025) - Year-Wise & Shift-Wise Mock Tests{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+        <div>
+            <div class="flex items-center space-x-2 text-xs font-semibold text-blue-600 uppercase tracking-wider mb-1">
+                <i class="fa-solid fa-layer-group"></i>
+                <span>Previous Year Exam Archive</span>
+            </div>
+            <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">
+                SSC CGL Previous Year Papers
+            </h1>
+            <p class="text-sm text-slate-600 mt-1 max-w-2xl">
+                Practice official Tier 1 and Tier 2 shift papers year-wise in real exam simulation format. Review question-by-question with verified official answer keys and step-by-step solutions.
+            </p>
+        </div>
+
+        {% if current_user.role == 'admin' %}
+        <div class="flex items-center space-x-2">
+            <a href="{{ url_for('admin_papers') }}" class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-lg shadow-sm flex items-center space-x-1.5">
+                <i class="fa-solid fa-plus"></i>
+                <span>Add / Manage Papers</span>
+            </a>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Filter Bar (Year Tabs & Paper Type Filter) -->
+    <div class="bg-white rounded-2xl border border-slate-200 p-4 mb-8 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <!-- Year Filter Chips -->
+        <div class="flex items-center space-x-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-thin">
+            <a href="{{ url_for('papers', type=selected_type) }}" 
+               class="px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-colors whitespace-nowrap {% if not selected_year %}bg-blue-600 text-white shadow-sm{% else %}bg-slate-100 text-slate-700 hover:bg-slate-200{% endif %}">
+                All Years
+            </a>
+            {% for yr in available_years %}
+            <a href="{{ url_for('papers', year=yr, type=selected_type) }}" 
+               class="px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-colors whitespace-nowrap {% if selected_year == yr %}bg-blue-600 text-white shadow-sm{% else %}bg-slate-100 text-slate-700 hover:bg-slate-200{% endif %}">
+                {{ yr }}
+            </a>
+            {% endfor %}
+        </div>
+
+        <!-- Type Filter Dropdown -->
+        <div class="flex items-center space-x-2 text-xs">
+            <span class="text-slate-500 font-medium">Type:</span>
+            <select onchange="window.location.href=this.value" class="px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs font-medium focus:ring-2 focus:ring-blue-500">
+                <option value="{{ url_for('papers', year=selected_year) }}" {% if not selected_type %}selected{% endif %}>All Types</option>
+                <option value="{{ url_for('papers', year=selected_year, type='official_pyq') }}" {% if selected_type == 'official_pyq' %}selected{% endif %}>Official PYQs</option>
+                <option value="{{ url_for('papers', year=selected_year, type='model_paper') }}" {% if selected_type == 'model_paper' %}selected{% endif %}>Model Papers</option>
+                <option value="{{ url_for('papers', year=selected_year, type='practice_paper') }}" {% if selected_type == 'practice_paper' %}selected{% endif %}>Practice Tests</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Year-Wise Paper Groups -->
+    {% if grouped_papers %}
+        <div class="space-y-10">
+            {% for yr, papers in grouped_papers.items() %}
+            <div class="space-y-4">
+                <div class="flex items-center space-x-3 pb-2 border-b border-slate-200">
+                    <div class="w-8 h-8 rounded-lg bg-ssc-900 text-white flex items-center justify-center font-bold text-sm">
+                        {{ yr }}
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-900">SSC CGL {{ yr }} Question Papers</h2>
+                        <p class="text-xs text-slate-500">{{ papers|length }} shift paper{{ 's' if papers|length > 1 else '' }} available for interactive mock testing</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {% for paper in papers %}
+                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-blue-300 transition-all flex flex-col justify-between overflow-hidden">
+                        <!-- Card Header -->
+                        <div class="p-5 border-b border-slate-100">
+                            <div class="flex items-center justify-between mb-2">
+                                <div class="flex items-center space-x-2">
+                                    <span class="text-xs font-extrabold px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200">
+                                        {{ paper.tier }}
+                                    </span>
+                                    <span class="text-xs font-bold text-slate-700">
+                                        {{ paper.shift }}
+                                    </span>
+                                </div>
+                                <!-- Provenance Badge (Requirement Section 19) -->
+                                {% if paper.paper_type == 'official_pyq' %}
+                                <span class="text-[11px] px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-semibold flex items-center space-x-1">
+                                    <i class="fa-solid fa-certificate text-[10px]"></i>
+                                    <span>Official PYQ</span>
+                                </span>
+                                {% elif paper.paper_type == 'model_paper' %}
+                                <span class="text-[11px] px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-200 font-semibold flex items-center space-x-1">
+                                    <i class="fa-solid fa-wand-magic-sparkles text-[10px]"></i>
+                                    <span>Model Paper</span>
+                                </span>
+                                {% else %}
+                                <span class="text-[11px] px-2 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200 font-semibold flex items-center space-x-1">
+                                    <i class="fa-solid fa-vial text-[10px]"></i>
+                                    <span>Practice Test</span>
+                                </span>
+                                {% endif %}
+                            </div>
+
+                            <h3 class="text-base font-bold text-slate-900 hover:text-blue-600 transition-colors">
+                                <a href="{{ url_for('paper_detail', paper_id=paper.id) }}">{{ paper.title }}</a>
+                            </h3>
+
+                            <p class="text-xs text-slate-500 mt-2 line-clamp-2 leading-relaxed">
+                                {{ paper.instructions or 'Official SSC CGL computer-based test pattern with negative marking.' }}
+                            </p>
+                        </div>
+
+                        <!-- Card Body Specs -->
+                        <div class="p-5 bg-slate-50/50 flex-grow">
+                            <div class="grid grid-cols-3 gap-2 text-center text-xs">
+                                <div class="bg-white p-2 rounded-lg border border-slate-200">
+                                    <span class="text-slate-400 block text-[10px] uppercase font-semibold">Questions</span>
+                                    <span class="font-bold text-slate-900 text-sm">{{ paper.actual_question_count }} Qs</span>
+                                </div>
+                                <div class="bg-white p-2 rounded-lg border border-slate-200">
+                                    <span class="text-slate-400 block text-[10px] uppercase font-semibold">Marks</span>
+                                    <span class="font-bold text-slate-900 text-sm">{{ (paper.actual_question_count * paper.marks_per_question)|round|int }}</span>
+                                </div>
+                                <div class="bg-white p-2 rounded-lg border border-slate-200">
+                                    <span class="text-slate-400 block text-[10px] uppercase font-semibold">Duration</span>
+                                    <span class="font-bold text-slate-900 text-sm">{{ paper.duration_minutes }}m</span>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center justify-between text-[11px] text-slate-500 mt-3 pt-3 border-t border-slate-200/60">
+                                <span><i class="fa-solid fa-plus-minus text-blue-500 mr-1"></i> +{{ paper.marks_per_question }} / -{{ paper.negative_marks }}</span>
+                                <span class="truncate max-w-[140px] text-slate-400" title="{{ paper.source_attribution }}">{{ paper.source_attribution or 'SSC Archive' }}</span>
+                            </div>
+                        </div>
+
+                        <!-- Card Action CTA -->
+                        <div class="p-4 bg-white border-t border-slate-100 flex items-center gap-2">
+                            <a href="{{ url_for('paper_detail', paper_id=paper.id) }}" class="flex-1 py-2 text-center bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg transition-colors">
+                                Paper Info
+                            </a>
+                            <a href="{{ url_for('take_test', paper_id=paper.id) }}" class="flex-1 py-2 text-center bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg shadow-sm transition-colors flex items-center justify-center space-x-1.5">
+                                <i class="fa-solid fa-play text-[10px]"></i>
+                                <span>Start Mock Test</span>
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="bg-white rounded-2xl border border-slate-200 p-12 text-center">
+            <div class="w-16 h-16 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-4">
+                <i class="fa-solid fa-folder-open text-2xl"></i>
+            </div>
+            <h3 class="text-lg font-bold text-slate-900">No question papers found</h3>
+            <p class="text-xs text-slate-500 mt-1 max-w-sm mx-auto">There are no question papers matching your selected year or category filter.</p>
+            <a href="{{ url_for('papers') }}" class="inline-block mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold rounded-lg">
+                Reset Filters
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

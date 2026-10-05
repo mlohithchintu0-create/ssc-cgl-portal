@@ -1,0 +1,320 @@
+{% extends "base.html" %}
+
+{% block title %}Mock Test: {{ paper.title }} | SSC CGL Online Exam Interface{% endblock %}
+
+{% block head %}
+<style>
+    /* Exam screen full height mode */
+    body {
+        background-color: #f8fafc;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-[1600px] mx-auto px-2 sm:px-4 lg:px-6 py-4" id="exam-app" data-attempt-id="{{ attempt.id }}">
+    
+    <!-- Top Examination Control Bar -->
+    <div class="bg-white rounded-xl border border-slate-200 p-3 sm:p-4 mb-4 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-3 sticky top-16 z-30">
+        <div class="flex items-center space-x-3">
+            <span class="w-8 h-8 rounded-lg bg-ssc-900 text-white flex items-center justify-center font-bold text-xs">
+                SSC
+            </span>
+            <div>
+                <h1 class="font-bold text-slate-900 text-sm sm:text-base leading-tight">
+                    {{ paper.title }}
+                </h1>
+                <div class="flex items-center space-x-2 text-[11px] text-slate-500 mt-0.5">
+                    <span>{{ paper.tier }} • {{ paper.shift }}</span>
+                    <span>•</span>
+                    <span>+{{ paper.marks_per_question }} / -{{ paper.negative_marks }}</span>
+                    <span>•</span>
+                    <span id="save-status" class="text-emerald-600 font-medium flex items-center gap-1">
+                        <i class="fa-solid fa-cloud-arrow-up text-[10px]"></i> Auto-saved
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Timer & End Test -->
+        <div class="flex items-center justify-between md:justify-end space-x-4">
+            <!-- Mobile Toggle Palette -->
+            <button type="button" onclick="toggleMobilePalette()" class="md:hidden px-3 py-1.5 bg-slate-100 text-slate-700 rounded-lg text-xs font-semibold flex items-center space-x-1.5 border border-slate-200">
+                <i class="fa-solid fa-table-cells-large"></i>
+                <span>Palette</span>
+            </button>
+
+            <!-- Countdown Timer -->
+            <div id="timer-box" class="flex items-center space-x-2 bg-slate-900 text-white px-3.5 py-1.5 rounded-lg font-mono text-sm font-bold shadow-inner">
+                <i class="fa-regular fa-clock text-blue-400" id="timer-icon"></i>
+                <span class="text-xs font-sans text-slate-300 font-normal hidden sm:inline">Time Left:</span>
+                <span id="timer-display">--:--</span>
+            </div>
+
+            <!-- Submit Test Header Button -->
+            <button type="button" onclick="confirmSubmitTest()" class="px-4 py-1.5 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-lg shadow-sm transition-colors flex items-center space-x-1.5">
+                <i class="fa-solid fa-flag-checkered"></i>
+                <span>Finish Test</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Exam Layout: 2 Columns (Main Question Area + Right Question Palette) -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+        
+        <!-- ========================================== -->
+        <!-- Main Area: Left / Center (8 or 9 Cols)     -->
+        <!-- ========================================== -->
+        <div class="lg:col-span-8 xl:col-span-9 space-y-4">
+            
+            <!-- Section Tabs (GI, GA, QA, EC) -->
+            <div id="section-tabs" class="flex items-center space-x-2 overflow-x-auto pb-1 text-xs">
+                <!-- Injected dynamically via test-engine.js -->
+            </div>
+
+            <!-- Question Card (Section 6 & 7) -->
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-7 relative min-h-[460px] flex flex-col justify-between" id="question-card">
+                
+                <!-- Loading Skeleton -->
+                <div id="loading-state" class="py-20 text-center">
+                    <i class="fa-solid fa-circle-notch fa-spin text-3xl text-blue-600"></i>
+                    <p class="text-xs text-slate-500 mt-2 font-medium">Loading Examination Questions...</p>
+                </div>
+
+                <!-- Active Question Content -->
+                <div id="question-content" class="hidden space-y-5">
+                    
+                    <!-- Question Header Meta -->
+                    <div class="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-slate-100">
+                        <div class="flex items-center space-x-2">
+                            <span class="px-2.5 py-1 rounded-md bg-blue-50 text-blue-700 border border-blue-200 font-bold text-xs" id="q-number-badge">
+                                Question 1
+                            </span>
+                            <span class="px-2 py-0.5 rounded bg-slate-100 text-slate-700 text-xs font-medium" id="q-subject-badge">
+                                Subject
+                            </span>
+                            <span class="px-2 py-0.5 rounded bg-slate-100 text-slate-600 text-[11px]" id="q-topic-badge">
+                                Topic
+                            </span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-[11px] text-slate-400 font-mono" id="q-id-badge">ID: #0</span>
+                            <span class="px-2 py-0.5 rounded text-[11px] font-semibold" id="q-diff-badge">Medium</span>
+                            <span class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 text-[11px] font-semibold" id="q-type-badge">Official PYQ</span>
+                        </div>
+                    </div>
+
+                    <!-- Question Text -->
+                    <div class="text-base sm:text-lg font-medium text-slate-900 leading-relaxed whitespace-pre-line" id="q-text">
+                        <!-- Dynamic Question Text -->
+                    </div>
+
+                    <!-- Optional Image -->
+                    <div id="q-image-container" class="hidden my-3 max-w-md">
+                        <img id="q-image" src="" alt="Question Diagram" class="rounded-lg border border-slate-200 shadow-sm max-h-60 object-contain">
+                    </div>
+
+                    <!-- 4 Answer Options (A, B, C, D) -->
+                    <div class="space-y-3 pt-2" id="options-container">
+                        <!-- Options injected dynamically -->
+                    </div>
+
+                    <!-- Immediate Feedback Box (Section 8 Requirement) -->
+                    <div id="instant-feedback-box" class="hidden mt-6 rounded-xl p-5 border transition-all">
+                        <div class="flex items-center space-x-2 mb-2 font-bold text-sm" id="feedback-title">
+                            <!-- ✅ Correct Answer / ❌ Wrong Answer -->
+                        </div>
+                        <p class="text-xs mb-3 font-medium" id="feedback-subtitle"></p>
+                        
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs mb-3">
+                            <div class="p-2.5 rounded-lg bg-white/70 border border-slate-200" id="feedback-user-ans">
+                                <span class="text-slate-500 font-medium block">Your Answer:</span>
+                                <span class="font-bold text-slate-800" id="feedback-user-ans-text">-</span>
+                            </div>
+                            <div class="p-2.5 rounded-lg bg-white/70 border border-slate-200" id="feedback-correct-ans">
+                                <span class="text-slate-500 font-medium block">Correct Answer:</span>
+                                <span class="font-bold text-emerald-700" id="feedback-correct-ans-text">-</span>
+                            </div>
+                        </div>
+
+                        <!-- Blue Explanation Box (Section 8: Blue = Information) -->
+                        <div class="bg-blue-50/80 border border-blue-200 rounded-lg p-3.5 text-xs text-blue-950">
+                            <div class="flex items-center space-x-1.5 font-bold text-blue-900 mb-1">
+                                <i class="fa-solid fa-circle-info text-blue-600"></i>
+                                <span>Detailed Official Explanation:</span>
+                            </div>
+                            <div id="feedback-explanation" class="leading-relaxed whitespace-pre-line text-slate-800">
+                                <!-- Explanation text -->
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Bottom Button Navigation Controls -->
+                <div class="mt-8 pt-4 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3">
+                    <div class="flex items-center space-x-2">
+                        <button type="button" id="btn-prev" onclick="goToPrevQuestion()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg border border-slate-300 transition-colors flex items-center space-x-1.5 disabled:opacity-40">
+                            <i class="fa-solid fa-chevron-left text-[10px]"></i>
+                            <span>Previous</span>
+                        </button>
+                        <button type="button" id="btn-clear" onclick="clearAnswer()" class="px-3.5 py-2 bg-slate-100 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-300 text-slate-600 text-xs font-medium rounded-lg border border-slate-200 transition-colors">
+                            Clear Answer
+                        </button>
+                    </div>
+
+                    <div class="flex items-center space-x-2">
+                        <button type="button" id="btn-mark-review" onclick="toggleMarkReview()" class="px-3.5 py-2 bg-amber-50 hover:bg-amber-100 text-amber-800 text-xs font-semibold rounded-lg border border-amber-300 transition-colors flex items-center space-x-1.5">
+                            <i class="fa-regular fa-bookmark"></i>
+                            <span id="mark-review-text">Mark for Review</span>
+                        </button>
+
+                        <!-- Submit Answer (Immediate Answer Checking Mode) -->
+                        <button type="button" id="btn-submit-answer" onclick="submitCurrentAnswer()" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg shadow-sm transition-colors flex items-center space-x-1.5">
+                            <i class="fa-solid fa-check-double text-xs"></i>
+                            <span>Submit Answer</span>
+                        </button>
+
+                        <button type="button" id="btn-next" onclick="goToNextQuestion()" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg shadow-sm transition-colors flex items-center space-x-1.5">
+                            <span>Next</span>
+                            <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- Right Sidebar: Question Palette (Section 6)-->
+        <!-- ========================================== -->
+        <div id="palette-sidebar" class="hidden lg:block lg:col-span-4 xl:col-span-3 space-y-4">
+            
+            <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+                <!-- Candidate Info Mini Card -->
+                <div class="flex items-center justify-between pb-4 mb-4 border-b border-slate-100">
+                    <div class="flex items-center space-x-2.5">
+                        <div class="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-xs uppercase">
+                            {{ current_user.username[0] }}
+                        </div>
+                        <div class="truncate max-w-[140px]">
+                            <div class="text-xs font-bold text-slate-900 truncate">{{ current_user.full_name }}</div>
+                            <div class="text-[10px] text-slate-400">Roll: CGL-{{ current_user.id * 1000 + attempt.id }}</div>
+                        </div>
+                    </div>
+                    <span class="text-[11px] font-bold px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200">
+                        Live Exam
+                    </span>
+                </div>
+
+                <!-- Palette Legend (Attempted, Unattempted, Current, Marked, Remaining) -->
+                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3">Question Palette</h4>
+                
+                <div class="grid grid-cols-2 gap-2 text-xs mb-5">
+                    <div class="flex items-center space-x-2 p-1.5 rounded-lg bg-emerald-50 border border-emerald-200">
+                        <span class="w-5 h-5 rounded bg-emerald-600 text-white flex items-center justify-center text-[10px] font-bold" id="stat-attempted">0</span>
+                        <span class="text-[11px] text-emerald-900 font-medium">Attempted</span>
+                    </div>
+                    <div class="flex items-center space-x-2 p-1.5 rounded-lg bg-slate-50 border border-slate-200">
+                        <span class="w-5 h-5 rounded bg-white text-slate-700 border border-slate-300 flex items-center justify-center text-[10px] font-bold" id="stat-unattempted">0</span>
+                        <span class="text-[11px] text-slate-700 font-medium">Unattempted</span>
+                    </div>
+                    <div class="flex items-center space-x-2 p-1.5 rounded-lg bg-amber-50 border border-amber-200">
+                        <span class="w-5 h-5 rounded bg-amber-500 text-white flex items-center justify-center text-[10px] font-bold" id="stat-marked">0</span>
+                        <span class="text-[11px] text-amber-900 font-medium">For Review</span>
+                    </div>
+                    <div class="flex items-center space-x-2 p-1.5 rounded-lg bg-blue-50 border border-blue-200">
+                        <span class="w-5 h-5 rounded bg-blue-700 text-white flex items-center justify-center text-[10px] font-bold" id="stat-current">1</span>
+                        <span class="text-[11px] text-blue-900 font-medium">Current</span>
+                    </div>
+                </div>
+
+                <!-- Question Number Grid -->
+                <div class="max-h-[360px] overflow-y-auto pr-1">
+                    <div id="palette-grid" class="grid grid-cols-5 gap-2">
+                        <!-- Buttons 1 to N injected dynamically -->
+                    </div>
+                </div>
+
+                <!-- Submit Mock Test Button (Section 10) -->
+                <div class="mt-6 pt-4 border-t border-slate-100">
+                    <button type="button" onclick="confirmSubmitTest()" class="w-full py-2.5 bg-ssc-900 hover:bg-ssc-800 text-white text-xs font-bold rounded-xl shadow-md transition-all flex items-center justify-center space-x-2">
+                        <i class="fa-solid fa-flag-checkered text-amber-400"></i>
+                        <span>Submit Final Test Paper</span>
+                    </button>
+                    <p class="text-[10px] text-slate-400 text-center mt-2">
+                        Your test will automatically submit if timer reaches 00:00
+                    </p>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<!-- Test Completion Confirmation Modal (Section 10 Requirement) -->
+<div id="submit-confirm-modal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 transform transition-all animate-scaleIn">
+        <div class="w-12 h-12 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center mx-auto mb-4">
+            <i class="fa-solid fa-clipboard-check text-2xl"></i>
+        </div>
+        <h3 class="text-xl font-bold text-center text-slate-900">
+            Submit Test Paper?
+        </h3>
+        <p class="text-xs text-center text-slate-600 mt-2">
+            You have completed all questions. Are you sure you want to submit the test?
+        </p>
+
+        <!-- Summary in modal -->
+        <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 my-5 grid grid-cols-3 gap-2 text-center text-xs">
+            <div>
+                <span class="text-slate-400 block text-[10px]">Attempted</span>
+                <span class="font-bold text-emerald-600 text-base" id="modal-attempted-count">0</span>
+            </div>
+            <div>
+                <span class="text-slate-400 block text-[10px]">Unattempted</span>
+                <span class="font-bold text-slate-600 text-base" id="modal-unattempted-count">0</span>
+            </div>
+            <div>
+                <span class="text-slate-400 block text-[10px]">For Review</span>
+                <span class="font-bold text-amber-600 text-base" id="modal-review-count">0</span>
+            </div>
+        </div>
+
+        <div class="flex items-center space-x-3">
+            <button type="button" onclick="closeConfirmModal()" class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl border border-slate-300 transition-colors">
+                Continue Test
+            </button>
+            <button type="button" id="btn-final-submit" onclick="executeFinalSubmit()" class="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl shadow-md transition-colors flex items-center justify-center space-x-1.5">
+                <span>Submit Test</span>
+                <i class="fa-solid fa-arrow-right text-[10px]"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Mobile Palette Overlay -->
+<div id="mobile-palette-drawer" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex justify-end">
+    <div class="w-80 max-w-full bg-white h-full p-5 overflow-y-auto shadow-2xl flex flex-col justify-between">
+        <div>
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
+                <h4 class="font-bold text-slate-900 text-sm">Question Palette</h4>
+                <button type="button" onclick="toggleMobilePalette()" class="text-slate-400 hover:text-slate-600 text-base">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div id="mobile-palette-grid" class="grid grid-cols-5 gap-2"></div>
+        </div>
+        <div class="pt-4 border-t border-slate-100">
+            <button type="button" onclick="confirmSubmitTest()" class="w-full py-2.5 bg-ssc-900 text-white text-xs font-bold rounded-xl">
+                Submit Test
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/test-engine.js') }}"></script>
+{% endblock %}

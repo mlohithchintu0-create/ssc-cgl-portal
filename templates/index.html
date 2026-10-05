@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block title %}SSC CGL Previous Year Papers & Interactive Mock Tests{% endblock %}
+
+{% block content %}
+<div class="relative overflow-hidden bg-gradient-to-b from-ssc-900 to-slate-900 text-white py-16 sm:py-24">
+    <!-- Background grid decoration -->
+    <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#3b82f6_1px,transparent_1px)] [background-size:16px_16px]"></div>
+
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-400/20 text-blue-300 text-xs font-semibold mb-6">
+            <span class="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span>SSC CGL 2025 Tier 1 & 2 Exam Pattern Enabled</span>
+        </div>
+        <h1 class="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-white max-w-4xl mx-auto leading-tight">
+            Master SSC CGL with Authentic <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-teal-300">Previous Year Papers</span> & Instant Mocks
+        </h1>
+        <p class="mt-6 text-lg sm:text-xl text-slate-300 max-w-2xl mx-auto font-light leading-relaxed">
+            Practice real SSC CGL shifts year-wise with one question at a time, instant answer verification, detailed step-by-step solutions, negative marking simulation, and complete performance scorecards.
+        </p>
+        <div class="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
+            <a href="{{ url_for('signup') }}" class="w-full sm:w-auto px-8 py-3.5 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl shadow-lg shadow-blue-500/25 transition-all text-base flex items-center justify-center space-x-2 group">
+                <span>Start Free Mock Test</span>
+                <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+            </a>
+            <a href="{{ url_for('login') }}" class="w-full sm:w-auto px-8 py-3.5 bg-slate-800/80 hover:bg-slate-700 text-slate-200 font-semibold rounded-xl border border-slate-700 transition-all text-base">
+                Sign In to Account
+            </a>
+        </div>
+
+        <!-- Quick Metrics Counter -->
+        <div class="mt-14 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto text-left">
+            <div class="bg-slate-800/50 backdrop-blur border border-slate-700/60 p-4 rounded-xl">
+                <div class="text-2xl font-bold text-white">{{ total_papers }}+</div>
+                <div class="text-xs text-slate-400 mt-1">Year-Wise Shift Papers</div>
+            </div>
+            <div class="bg-slate-800/50 backdrop-blur border border-slate-700/60 p-4 rounded-xl">
+                <div class="text-2xl font-bold text-emerald-400">+2 / -0.50</div>
+                <div class="text-xs text-slate-400 mt-1">Real Exam Negative Scheme</div>
+            </div>
+            <div class="bg-slate-800/50 backdrop-blur border border-slate-700/60 p-4 rounded-xl">
+                <div class="text-2xl font-bold text-blue-400">4 Core</div>
+                <div class="text-xs text-slate-400 mt-1">Subjects (GI, GA, QA, EC)</div>
+            </div>
+            <div class="bg-slate-800/50 backdrop-blur border border-slate-700/60 p-4 rounded-xl">
+                <div class="text-2xl font-bold text-amber-400">Instant</div>
+                <div class="text-xs text-slate-400 mt-1">Answer & Rationale Checking</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Features Section -->
+<div class="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center max-w-3xl mx-auto mb-12">
+        <h2 class="text-xs uppercase font-bold text-blue-600 tracking-wider">Designed For Serious Aspirants</h2>
+        <h3 class="text-3xl font-bold text-slate-900 mt-2">How Our SSC CGL Mock Engine Works</h3>
+        <p class="text-slate-600 text-sm mt-3">From real question palettes to instantaneous solution verification and subject-wise accuracy analysis.</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <!-- Feature 1 -->
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+            <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl mb-5">
+                <i class="fa-solid fa-clock-rotate-left"></i>
+            </div>
+            <h4 class="text-lg font-bold text-slate-900 mb-2">Year-Wise Real Papers</h4>
+            <p class="text-slate-600 text-sm leading-relaxed">
+                Practice actual SSC CGL Tier 1 shifts (2024, 2023, 2022, 2021, and back to 2016) with exact official questions and verified model tests.
+            </p>
+        </div>
+
+        <!-- Feature 2 -->
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+            <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl mb-5">
+                <i class="fa-solid fa-bolt"></i>
+            </div>
+            <h4 class="text-lg font-bold text-slate-900 mb-2">Instant Answer Checking</h4>
+            <p class="text-slate-600 text-sm leading-relaxed">
+                Submit each question to immediately know whether it is Correct (<span class="text-emerald-600 font-semibold">✅ Green</span>) or Wrong (<span class="text-rose-600 font-semibold">❌ Red</span>), complete with detailed explanations.
+            </p>
+        </div>
+
+        <!-- Feature 3 -->
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+            <div class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl mb-5">
+                <i class="fa-solid fa-chart-pie"></i>
+            </div>
+            <h4 class="text-lg font-bold text-slate-900 mb-2">Comprehensive Scorecard</h4>
+            <p class="text-slate-600 text-sm leading-relaxed">
+                Receive auto-calculated positive marks, negative marks, net score, accuracy %, time taken, and subject-wise breakdown upon test submission.
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- Subjects Overview -->
+<div class="bg-white border-y border-slate-200 py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h3 class="text-2xl font-bold text-slate-900 text-center mb-8">All 4 SSC CGL Examination Sections Covered</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="p-5 rounded-xl border border-slate-200 bg-slate-50">
+                <div class="flex items-center space-x-3 mb-3">
+                    <span class="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center text-xs font-bold">GI</span>
+                    <h4 class="font-bold text-slate-900 text-sm">General Intelligence</h4>
+                </div>
+                <p class="text-xs text-slate-600">Analogies, series, coding-decoding, blood relations, syllogisms, and non-verbal reasoning.</p>
+            </div>
+            <div class="p-5 rounded-xl border border-slate-200 bg-slate-50">
+                <div class="flex items-center space-x-3 mb-3">
+                    <span class="w-8 h-8 rounded-lg bg-emerald-600 text-white flex items-center justify-center text-xs font-bold">GA</span>
+                    <h4 class="font-bold text-slate-900 text-sm">General Awareness</h4>
+                </div>
+                <p class="text-xs text-slate-600">Indian polity, modern history, geography, economy, general science, and current events.</p>
+            </div>
+            <div class="p-5 rounded-xl border border-slate-200 bg-slate-50">
+                <div class="flex items-center space-x-3 mb-3">
+                    <span class="w-8 h-8 rounded-lg bg-indigo-600 text-white flex items-center justify-center text-xs font-bold">QA</span>
+                    <h4 class="font-bold text-slate-900 text-sm">Quantitative Aptitude</h4>
+                </div>
+                <p class="text-xs text-slate-600">Arithmetic, percentage, profit & loss, algebra, geometry, trigonometry, and mensuration.</p>
+            </div>
+            <div class="p-5 rounded-xl border border-slate-200 bg-slate-50">
+                <div class="flex items-center space-x-3 mb-3">
+                    <span class="w-8 h-8 rounded-lg bg-amber-600 text-white flex items-center justify-center text-xs font-bold">EC</span>
+                    <h4 class="font-bold text-slate-900 text-sm">English Comprehension</h4>
+                </div>
+                <p class="text-xs text-slate-600">Grammar rules, spotting errors, synonyms, antonyms, idioms, one-word substitution, and RC.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

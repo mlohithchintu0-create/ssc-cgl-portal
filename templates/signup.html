@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block title %}Create Aspirant Account - SSC CGL Mock Portal{% endblock %}
+
+{% block content %}
+<div class="min-h-[calc(100vh-140px)] flex flex-col justify-center py-12 sm:px-6 lg:px-8 bg-slate-50">
+    <div class="sm:mx-auto sm:w-full sm:max-w-md">
+        <div class="w-12 h-12 rounded-xl bg-blue-600 flex items-center justify-center text-white mx-auto shadow-md">
+            <i class="fa-solid fa-user-plus text-2xl"></i>
+        </div>
+        <h2 class="mt-4 text-center text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">
+            Create Aspirant Account
+        </h2>
+        <p class="mt-2 text-center text-sm text-slate-600">
+            Already have an account?
+            <a href="{{ url_for('login') }}" class="font-medium text-blue-600 hover:text-blue-500 hover:underline">
+                Sign in here
+            </a>
+        </p>
+    </div>
+
+    <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+        <div class="bg-white py-8 px-4 shadow-sm border border-slate-200 sm:rounded-2xl sm:px-10">
+            <form class="space-y-4" action="{{ url_for('signup') }}" method="POST">
+                <div>
+                    <label for="full_name" class="block text-sm font-medium text-slate-700">Full Name</label>
+                    <div class="mt-1 relative rounded-md shadow-sm">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                            <i class="fa-solid fa-id-card text-sm"></i>
+                        </div>
+                        <input id="full_name" name="full_name" type="text" required
+                            class="block w-full pl-10 pr-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-600 focus:border-blue-600 placeholder-slate-400"
+                            placeholder="e.g. Ramesh Kumar">
+                    </div>
+                </div>
+
+                <div>
+                    <label for="username" class="block text-sm font-medium text-slate-700">Username</label>
+                    <div class="mt-1 relative rounded-md shadow-sm">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                            <i class="fa-solid fa-at text-sm"></i>
+                        </div>
+                        <input id="username" name="username" type="text" required
+                            class="block w-full pl-10 pr-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-600 focus:border-blue-600 placeholder-slate-400"
+                            placeholder="e.g. ramesh_cgl25">
+                    </div>
+                </div>
+
+                <div>
+                    <label for="email" class="block text-sm font-medium text-slate-700">Email Address</label>
+                    <div class="mt-1 relative rounded-md shadow-sm">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                            <i class="fa-solid fa-envelope text-sm"></i>
+                        </div>
+                        <input id="email" name="email" type="email" required
+                            class="block w-full pl-10 pr-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-600 focus:border-blue-600 placeholder-slate-400"
+                            placeholder="e.g. ramesh@example.com">
+                    </div>
+                </div>
+
+                <div>
+                    <label for="target_year" class="block text-sm font-medium text-slate-700">Target SSC CGL Exam Year</label>
+                    <div class="mt-1">
+                        <select id="target_year" name="target_year" class="block w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-600 focus:border-blue-600">
+                            <option value="2025" selected>SSC CGL 2025</option>
+                            <option value="2026">SSC CGL 2026</option>
+                            <option value="2024">SSC CGL 2024 (Re-Attempt / Tier 2)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="password" class="block text-sm font-medium text-slate-700">Password</label>
+                    <div class="mt-1 relative rounded-md shadow-sm">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                            <i class="fa-solid fa-lock text-sm"></i>
+                        </div>
+                        <input id="password" name="password" type="password" required minlength="6"
+                            class="block w-full pl-10 pr-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-600 focus:border-blue-600 placeholder-slate-400"
+                            placeholder="At least 6 characters">
+                    </div>
+                </div>
+
+                <div>
+                    <label for="confirm_password" class="block text-sm font-medium text-slate-700">Confirm Password</label>
+                    <div class="mt-1 relative rounded-md shadow-sm">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                            <i class="fa-solid fa-lock-check text-sm"></i>
+                        </div>
+                        <input id="confirm_password" name="confirm_password" type="password" required minlength="6"
+                            class="block w-full pl-10 pr-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-600 focus:border-blue-600 placeholder-slate-400"
+                            placeholder="Re-enter password">
+                    </div>
+                </div>
+
+                <div class="pt-2">
+                    <button type="submit"
+                        class="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
+                        Create Account & Start Tests
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: ssc-cgl-portal
+    env: python
+    buildCommand: "pip install -r requirements.txt && python seed_data.py"
+    startCommand: "gunicorn app:app --workers 2 --threads 4 --timeout 120"
+    plan: free
+    autoDeploy: true
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: PYTHON_VERSION
+        value: 3.11.0

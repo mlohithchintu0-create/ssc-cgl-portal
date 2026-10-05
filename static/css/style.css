@@ -1,0 +1,84 @@
+/* SSC CGL Mock Portal Custom Styles */
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* Exam Palette Button States */
+.palette-btn {
+    transition: all 0.15s ease-in-out;
+}
+.palette-btn.current {
+    ring: 2px;
+    ring-offset: 1px;
+    border-color: #1e40af;
+    background-color: #1e3a8a !important;
+    color: #ffffff !important;
+}
+.palette-btn.answered {
+    background-color: #10b981;
+    color: #ffffff;
+    border-color: #059669;
+}
+.palette-btn.wrong-submitted {
+    background-color: #ef4444;
+    color: #ffffff;
+    border-color: #dc2626;
+}
+.palette-btn.marked {
+    background-color: #f59e0b;
+    color: #ffffff;
+    border-color: #d97706;
+}
+.palette-btn.unanswered {
+    background-color: #ffffff;
+    color: #334155;
+    border-color: #cbd5e1;
+}
+
+/* Option Cards */
+.option-card {
+    transition: all 0.15s ease;
+    cursor: pointer;
+}
+.option-card:hover:not(.locked) {
+    border-color: #3b82f6;
+    background-color: #eff6ff;
+}
+.option-card.selected:not(.locked) {
+    border-color: #2563eb;
+    background-color: #dbeafe;
+    box-shadow: 0 0 0 1px #2563eb;
+}
+.option-card.correct-opt {
+    border-color: #10b981 !important;
+    background-color: #ecfdf5 !important;
+    color: #065f46 !important;
+}
+.option-card.wrong-opt {
+    border-color: #ef4444 !important;
+    background-color: #fef2f2 !important;
+    color: #991b1b !important;
+}
+
+/* Print styles for Results and Reviews */
+@media print {
+    header, footer, .no-print {
+        display: none !important;
+    }
+    body {
+        background-color: #ffffff !important;
+    }
+}

@@ -1,0 +1,364 @@
+{% extends "base.html" %}
+
+{% block title %}Question Bank & Bulk Import - Admin Portal{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+        <div>
+            <nav class="flex items-center space-x-2 text-xs text-slate-500 mb-2">
+                <a href="{{ url_for('admin_dashboard') }}" class="hover:text-blue-600">Admin</a>
+                <span>/</span>
+                <span class="text-slate-800 font-semibold">Question Bank</span>
+            </nav>
+            <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">
+                Question Bank Management
+            </h1>
+            <p class="text-xs sm:text-sm text-slate-600 mt-1">
+                Add, edit, or delete questions with verified official answers and step-by-step explanations.
+            </p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2">
+            <button type="button" onclick="openImportModal()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-sm transition-colors flex items-center space-x-1.5">
+                <i class="fa-solid fa-file-import text-xs"></i>
+                <span>Bulk Import (CSV/JSON)</span>
+            </button>
+            <a href="{{ url_for('admin_questions_export', paper_id=selected_paper, format='json') }}" class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl border border-slate-300 transition-colors flex items-center space-x-1">
+                <i class="fa-solid fa-file-export text-xs"></i>
+                <span>Export JSON</span>
+            </a>
+            <button type="button" onclick="openAddQuestionModal()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl shadow-sm transition-colors flex items-center space-x-1.5">
+                <i class="fa-solid fa-plus text-xs"></i>
+                <span>Add Question</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Filters Bar -->
+    <div class="bg-white rounded-2xl border border-slate-200 p-4 mb-6 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <form action="{{ url_for('admin_questions') }}" method="GET" class="flex flex-wrap items-center gap-3 w-full sm:w-auto">
+            <div class="flex items-center space-x-2 text-xs">
+                <span class="text-slate-500 font-medium">Paper:</span>
+                <select name="paper_id" onchange="this.form.submit()" class="px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs font-medium focus:ring-2 focus:ring-blue-500">
+                    <option value="">All Question Papers</option>
+                    {% for p in all_papers %}
+                    <option value="{{ p.id }}" {% if selected_paper == p.id %}selected{% endif %}>
+                        {{ p.title }} ({{ p.year }})
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="flex items-center space-x-2 text-xs">
+                <span class="text-slate-500 font-medium">Subject:</span>
+                <select name="subject_id" onchange="this.form.submit()" class="px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs font-medium focus:ring-2 focus:ring-blue-500">
+                    <option value="">All Subjects</option>
+                    {% for s in all_subjects %}
+                    <option value="{{ s.id }}" {% if selected_subject == s.id %}selected{% endif %}>
+                        {{ s.name }} ({{ s.code }})
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </form>
+
+        <div class="text-xs text-slate-500 font-medium">
+            Showing {{ questions|length }} Question{{ 's' if questions|length != 1 else '' }}
+        </div>
+    </div>
+
+    <!-- Questions Table -->
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs sm:text-sm">
+                <thead>
+                    <tr class="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold uppercase tracking-wider text-[11px]">
+                        <th class="p-4 text-center">#</th>
+                        <th class="p-4">Question Text</th>
+                        <th class="p-4 text-center">Subject</th>
+                        <th class="p-4 text-center">Topic / Diff</th>
+                        <th class="p-4 text-center">Correct</th>
+                        <th class="p-4 text-center">Type</th>
+                        <th class="p-4 text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    {% for q in questions %}
+                    <tr class="hover:bg-slate-50/70 transition-colors">
+                        <td class="p-4 text-center font-bold text-slate-800">
+                            Q{{ q.order_num }}
+                        </td>
+                        <td class="p-4 max-w-md">
+                            <span class="font-medium text-slate-900 block truncate" title="{{ q.question_text }}">
+                                {{ q.question_text }}
+                            </span>
+                            <span class="text-[11px] text-slate-400 truncate block mt-0.5">
+                                {{ q.paper_title }}
+                            </span>
+                        </td>
+                        <td class="p-4 text-center whitespace-nowrap">
+                            <span class="px-2 py-0.5 rounded bg-blue-50 text-blue-700 font-bold text-xs">
+                                {{ q.subject_code }}
+                            </span>
+                        </td>
+                        <td class="p-4 text-center whitespace-nowrap">
+                            <span class="text-slate-700 block font-medium">{{ q.topic or 'General' }}</span>
+                            <span class="text-[10px] text-slate-400">{{ q.difficulty }}</span>
+                        </td>
+                        <td class="p-4 text-center whitespace-nowrap">
+                            <span class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-800 font-bold text-xs inline-flex items-center justify-center">
+                                {{ q.correct_option }}
+                            </span>
+                        </td>
+                        <td class="p-4 text-center whitespace-nowrap">
+                            {% if q.question_type == 'official_pyq' %}
+                            <span class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-semibold">Official PYQ</span>
+                            {% else %}
+                            <span class="px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-200 text-xs font-semibold">Model</span>
+                            {% endif %}
+                        </td>
+                        <td class="p-4 text-right whitespace-nowrap">
+                            <div class="flex items-center justify-end space-x-1.5">
+                                <button type="button" onclick='openEditQuestionModal({{ q|tojson }})' class="p-1.5 text-slate-400 hover:text-blue-600 rounded-lg hover:bg-slate-100 transition-colors" title="Edit Question">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                </button>
+                                <form action="{{ url_for('admin_questions') }}" method="POST" onsubmit="return confirm('Delete this question?');" class="inline">
+                                    <input type="hidden" name="action" value="delete">
+                                    <input type="hidden" name="question_id" value="{{ q.id }}">
+                                    <button type="submit" class="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-slate-100 transition-colors" title="Delete Question">
+                                        <i class="fa-solid fa-trash-can"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<!-- Convenient Question Entry Form Modal (Section 15 Requirement) -->
+<div id="question-modal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl border border-slate-200 overflow-y-auto max-h-[90vh]">
+        <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-5">
+            <h3 class="font-bold text-slate-900 text-lg" id="qmodal-title">Add New Question</h3>
+            <button type="button" onclick="closeQuestionModal()" class="text-slate-400 hover:text-slate-600">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+        </div>
+
+        <form action="{{ url_for('admin_questions') }}" method="POST" class="space-y-4">
+            <input type="hidden" name="action" id="qform-action" value="add">
+            <input type="hidden" name="question_id" id="qform-id" value="">
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Target Paper</label>
+                    <select name="paper_id" id="qform-paper" required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs focus:ring-2 focus:ring-blue-600">
+                        {% for p in all_papers %}
+                        <option value="{{ p.id }}">{{ p.title }} ({{ p.year }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Subject</label>
+                    <select name="subject_id" id="qform-subject" required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs focus:ring-2 focus:ring-blue-600">
+                        {% for s in all_subjects %}
+                        <option value="{{ s.id }}">{{ s.name }} ({{ s.code }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Topic</label>
+                    <input type="text" name="topic" id="qform-topic" placeholder="e.g. Percentage, Analogy"
+                           class="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs focus:ring-2 focus:ring-blue-600">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Difficulty</label>
+                    <select name="difficulty" id="qform-difficulty" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs focus:ring-2 focus:ring-blue-600">
+                        <option value="Easy">Easy</option>
+                        <option value="Medium" selected>Medium</option>
+                        <option value="Hard">Hard</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Order #</label>
+                    <input type="number" name="order_num" id="qform-order" value="1" min="1"
+                           class="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs focus:ring-2 focus:ring-blue-600">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Question Text</label>
+                <textarea name="question_text" id="qform-text" required rows="3" placeholder="Enter complete question statement..."
+                          class="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs focus:ring-2 focus:ring-blue-600"></textarea>
+            </div>
+
+            <!-- 4 Options (A, B, C, D) -->
+            <div class="space-y-2">
+                <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider">Answer Options</label>
+                <div class="flex items-center space-x-2">
+                    <span class="w-6 h-6 rounded bg-slate-100 text-slate-700 font-bold text-xs flex items-center justify-center">A</span>
+                    <input type="text" name="option_a" id="qform-opt-a" required placeholder="Option A text"
+                           class="flex-grow px-3 py-2 border border-slate-300 rounded-lg text-xs">
+                </div>
+                <div class="flex items-center space-x-2">
+                    <span class="w-6 h-6 rounded bg-slate-100 text-slate-700 font-bold text-xs flex items-center justify-center">B</span>
+                    <input type="text" name="option_b" id="qform-opt-b" required placeholder="Option B text"
+                           class="flex-grow px-3 py-2 border border-slate-300 rounded-lg text-xs">
+                </div>
+                <div class="flex items-center space-x-2">
+                    <span class="w-6 h-6 rounded bg-slate-100 text-slate-700 font-bold text-xs flex items-center justify-center">C</span>
+                    <input type="text" name="option_c" id="qform-opt-c" required placeholder="Option C text"
+                           class="flex-grow px-3 py-2 border border-slate-300 rounded-lg text-xs">
+                </div>
+                <div class="flex items-center space-x-2">
+                    <span class="w-6 h-6 rounded bg-slate-100 text-slate-700 font-bold text-xs flex items-center justify-center">D</span>
+                    <input type="text" name="option_d" id="qform-opt-d" required placeholder="Option D text"
+                           class="flex-grow px-3 py-2 border border-slate-300 rounded-lg text-xs">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Correct Answer</label>
+                    <select name="correct_option" id="qform-correct" class="w-full px-3 py-2 border border-emerald-400 bg-emerald-50 text-emerald-950 font-bold rounded-lg text-xs focus:ring-2 focus:ring-emerald-500">
+                        <option value="A">Option A</option>
+                        <option value="B">Option B</option>
+                        <option value="C">Option C</option>
+                        <option value="D">Option D</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Question Type</label>
+                    <select name="question_type" id="qform-type" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs focus:ring-2 focus:ring-blue-600">
+                        <option value="official_pyq">Official Verified PYQ</option>
+                        <option value="model_question">Model Question</option>
+                        <option value="practice_question">Practice Question</option>
+                    </select>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Step-by-Step Explanation</label>
+                <textarea name="explanation" id="qform-explanation" rows="3" placeholder="Explain the rationale, formula, or shortcut..."
+                          class="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs focus:ring-2 focus:ring-blue-600"></textarea>
+            </div>
+
+            <div class="pt-3 flex items-center justify-end space-x-2">
+                <button type="button" onclick="closeQuestionModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg">
+                    Cancel
+                </button>
+                <button type="submit" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg shadow-sm">
+                    Save Question
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Bulk Import Modal (Section 15: CSV / JSON) -->
+<div id="import-modal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
+            <h3 class="font-bold text-slate-900 text-base">Bulk Question Import</h3>
+            <button type="button" onclick="closeImportModal()" class="text-slate-400 hover:text-slate-600">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <form action="{{ url_for('admin_questions_import') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
+            <div>
+                <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Target Paper</label>
+                <select name="target_paper_id" required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs focus:ring-2 focus:ring-blue-600">
+                    {% for p in all_papers %}
+                    <option value="{{ p.id }}">{{ p.title }} ({{ p.year }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Choose CSV or JSON File</label>
+                <input type="file" name="file" accept=".json,.csv" required
+                       class="w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+            </div>
+
+            <div class="bg-slate-50 rounded-lg p-3 text-[11px] text-slate-600 space-y-1">
+                <p class="font-semibold text-slate-800">Supported formats:</p>
+                <p>• <strong>JSON</strong> array with keys: <code>question_text, option_a, option_b, option_c, option_d, correct_option, explanation, subject_code (GI, GA, QA, EC)</code></p>
+                <p>• <strong>CSV</strong> with identical column headers.</p>
+            </div>
+
+            <div class="pt-2 flex items-center justify-end space-x-2">
+                <button type="button" onclick="closeImportModal()" class="px-4 py-2 bg-slate-100 text-slate-700 text-xs font-semibold rounded-lg">
+                    Cancel
+                </button>
+                <button type="submit" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg shadow-sm">
+                    Upload & Import
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openAddQuestionModal() {
+        document.getElementById('qmodal-title').textContent = 'Add New Question';
+        document.getElementById('qform-action').value = 'add';
+        document.getElementById('qform-id').value = '';
+        document.getElementById('qform-topic').value = '';
+        document.getElementById('qform-difficulty').value = 'Medium';
+        document.getElementById('qform-order').value = '1';
+        document.getElementById('qform-text').value = '';
+        document.getElementById('qform-opt-a').value = '';
+        document.getElementById('qform-opt-b').value = '';
+        document.getElementById('qform-opt-c').value = '';
+        document.getElementById('qform-opt-d').value = '';
+        document.getElementById('qform-correct').value = 'A';
+        document.getElementById('qform-type').value = 'official_pyq';
+        document.getElementById('qform-explanation').value = '';
+        document.getElementById('question-modal').classList.remove('hidden');
+    }
+
+    function openEditQuestionModal(q) {
+        document.getElementById('qmodal-title').textContent = 'Edit Question #' + q.id;
+        document.getElementById('qform-action').value = 'edit';
+        document.getElementById('qform-id').value = q.id;
+        document.getElementById('qform-paper').value = q.paper_id;
+        document.getElementById('qform-subject').value = q.subject_id;
+        document.getElementById('qform-topic').value = q.topic || '';
+        document.getElementById('qform-difficulty').value = q.difficulty || 'Medium';
+        document.getElementById('qform-order').value = q.order_num || 1;
+        document.getElementById('qform-text').value = q.question_text;
+        document.getElementById('qform-opt-a').value = q.option_a;
+        document.getElementById('qform-opt-b').value = q.option_b;
+        document.getElementById('qform-opt-c').value = q.option_c;
+        document.getElementById('qform-opt-d').value = q.option_d;
+        document.getElementById('qform-correct').value = q.correct_option;
+        document.getElementById('qform-type').value = q.question_type;
+        document.getElementById('qform-explanation').value = q.explanation || '';
+        document.getElementById('question-modal').classList.remove('hidden');
+    }
+
+    function closeQuestionModal() {
+        document.getElementById('question-modal').classList.add('hidden');
+    }
+
+    function openImportModal() {
+        document.getElementById('import-modal').classList.remove('hidden');
+    }
+
+    function closeImportModal() {
+        document.getElementById('import-modal').classList.add('hidden');
+    }
+</script>
+{% endblock %}

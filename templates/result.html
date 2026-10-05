@@ -1,0 +1,210 @@
+{% extends "base.html" %}
+
+{% block title %}Mock Test Result: {{ attempt.paper_title }} - SSC CGL Portal{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    
+    <!-- Test Result Header (Section 11 Requirement) -->
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden mb-8">
+        <div class="p-6 sm:p-8 bg-gradient-to-r from-ssc-900 to-slate-800 text-white flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div>
+                <div class="flex flex-wrap items-center gap-2 mb-2">
+                    <span class="px-2.5 py-0.5 rounded bg-blue-500/20 text-blue-200 border border-blue-400/30 text-xs font-bold">
+                        {{ attempt.exam_name }} {{ attempt.year }}
+                    </span>
+                    <span class="px-2.5 py-0.5 rounded bg-slate-700/60 text-slate-200 border border-slate-600 text-xs font-semibold">
+                        {{ attempt.tier }} • {{ attempt.shift }}
+                    </span>
+                    <span class="px-2.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 text-xs font-semibold">
+                        Mock Attempt Completed
+                    </span>
+                </div>
+                <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">
+                    Official Mock Test Result
+                </h1>
+                <p class="text-xs sm:text-sm text-slate-300 mt-1">
+                    {{ attempt.paper_title }}
+                </p>
+            </div>
+
+            <!-- Score Showcase Badge -->
+            <div class="bg-white/10 backdrop-blur rounded-2xl border border-white/20 p-5 text-center min-w-[200px]">
+                <span class="text-xs uppercase tracking-wider text-blue-200 font-semibold block">Your Final Score</span>
+                <div class="text-3xl sm:text-4xl font-black text-white mt-1">
+                    {{ attempt.final_score }} <span class="text-base font-normal text-slate-300">/ {{ attempt.max_marks }}</span>
+                </div>
+                <div class="text-xs font-bold mt-1 text-emerald-300">
+                    {{ attempt.percentage }}% Percentage
+                </div>
+            </div>
+        </div>
+
+        <!-- Performance Grade Message Card (Section 11 Requirement) -->
+        <div class="p-6 bg-slate-50 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="flex items-center space-x-3.5">
+                <div class="w-12 h-12 rounded-xl flex items-center justify-center text-xl font-bold text-white
+                    {% if perf_badge_color == 'emerald' %} bg-emerald-600
+                    {% elif perf_badge_color == 'blue' %} bg-blue-600
+                    {% elif perf_badge_color == 'indigo' %} bg-indigo-600
+                    {% elif perf_badge_color == 'amber' %} bg-amber-500
+                    {% else %} bg-rose-600 {% endif %}">
+                    <i class="fa-solid fa-medal"></i>
+                </div>
+                <div>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-xs uppercase font-bold text-slate-500">Performance Assessment:</span>
+                        <span class="text-sm font-extrabold 
+                            {% if perf_badge_color == 'emerald' %} text-emerald-700
+                            {% elif perf_badge_color == 'blue' %} text-blue-700
+                            {% elif perf_badge_color == 'indigo' %} text-indigo-700
+                            {% elif perf_badge_color == 'amber' %} text-amber-700
+                            {% else %} text-rose-700 {% endif %}">
+                            {{ perf_tier }}
+                        </span>
+                    </div>
+                    <p class="text-xs text-slate-600 mt-0.5 leading-relaxed">
+                        {{ perf_message }}
+                    </p>
+                </div>
+            </div>
+
+            <!-- Quick Action Links -->
+            <div class="flex items-center space-x-2">
+                <a href="{{ url_for('test_review', attempt_id=attempt.id) }}" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl shadow-sm transition-colors flex items-center space-x-1.5 whitespace-nowrap">
+                    <i class="fa-solid fa-list-check text-xs"></i>
+                    <span>Review Answers</span>
+                </a>
+                <a href="{{ url_for('take_test', paper_id=attempt.paper_id) }}" class="px-4 py-2 bg-white hover:bg-slate-100 text-slate-700 text-xs font-semibold rounded-xl border border-slate-300 transition-colors flex items-center space-x-1.5 whitespace-nowrap">
+                    <i class="fa-solid fa-rotate-right text-xs"></i>
+                    <span>Retake Mock</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- 6 Metrics Score Grid -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 divide-y sm:divide-y-0 sm:divide-x divide-slate-100 p-6 bg-white gap-4 sm:gap-0">
+            <!-- Correct Answers -->
+            <div class="text-center px-2">
+                <span class="text-[11px] text-slate-500 font-medium block">Correct</span>
+                <div class="text-2xl font-black text-emerald-600 mt-1">
+                    {{ attempt.correct_answers }}
+                </div>
+                <span class="text-[11px] text-emerald-700 font-semibold block mt-0.5">+{{ attempt.positive_marks }} Marks</span>
+            </div>
+
+            <!-- Wrong Answers -->
+            <div class="text-center px-2">
+                <span class="text-[11px] text-slate-500 font-medium block">Incorrect</span>
+                <div class="text-2xl font-black text-rose-600 mt-1">
+                    {{ attempt.wrong_answers }}
+                </div>
+                <span class="text-[11px] text-rose-700 font-semibold block mt-0.5">-{{ attempt.negative_marks }} Negative</span>
+            </div>
+
+            <!-- Unanswered -->
+            <div class="text-center px-2">
+                <span class="text-[11px] text-slate-500 font-medium block">Unanswered</span>
+                <div class="text-2xl font-black text-slate-500 mt-1">
+                    {{ attempt.unanswered_questions }}
+                </div>
+                <span class="text-[11px] text-slate-400 block mt-0.5">0.0 Marks</span>
+            </div>
+
+            <!-- Accuracy -->
+            <div class="text-center px-2">
+                <span class="text-[11px] text-slate-500 font-medium block">Accuracy</span>
+                <div class="text-2xl font-black text-blue-600 mt-1">
+                    {{ attempt.accuracy }}%
+                </div>
+                <span class="text-[11px] text-slate-500 block mt-0.5">Correct / Attempted</span>
+            </div>
+
+            <!-- Time Taken -->
+            <div class="text-center px-2">
+                <span class="text-[11px] text-slate-500 font-medium block">Time Taken</span>
+                {% set mins = (attempt.time_taken_seconds // 60) %}
+                {% set secs = (attempt.time_taken_seconds % 60) %}
+                <div class="text-2xl font-black text-slate-900 mt-1">
+                    {{ mins }}m {{ secs }}s
+                </div>
+                <span class="text-[11px] text-slate-500 block mt-0.5">Total Duration</span>
+            </div>
+
+            <!-- Avg Time / Q -->
+            <div class="text-center px-2">
+                <span class="text-[11px] text-slate-500 font-medium block">Avg Speed</span>
+                <div class="text-2xl font-black text-indigo-600 mt-1">
+                    {{ avg_time_per_q }}s
+                </div>
+                <span class="text-[11px] text-slate-500 block mt-0.5">Per Attempted Q</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Subject-Wise Performance Breakdown (Section 11 & 13) -->
+    <div class="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-sm mb-8">
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h3 class="font-bold text-slate-900 text-lg">Section-Wise Performance Card</h3>
+                <p class="text-xs text-slate-500">Breakdown across General Intelligence, General Awareness, Quant, and English</p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+            {% for sub in subject_results %}
+            {% set sub_att = sub.correct_count + sub.wrong_count %}
+            {% set sub_acc = (sub.correct_count / sub_att * 100) if sub_att > 0 else 0 %}
+            <div class="p-5 rounded-xl border border-slate-200 bg-slate-50/70 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-bold px-2 py-0.5 rounded bg-blue-100 text-blue-800">{{ sub.subject_code }}</span>
+                        <span class="text-xs font-bold {% if sub_acc >= 75 %}text-emerald-600{% elif sub_acc >= 50 %}text-blue-600{% else %}text-amber-600{% endif %}">
+                            {{ "%.1f"|format(sub_acc) }}% Acc
+                        </span>
+                    </div>
+                    <h4 class="font-bold text-slate-900 text-sm mb-3 truncate" title="{{ sub.subject_name }}">{{ sub.subject_name }}</h4>
+
+                    <!-- Progress bar -->
+                    <div class="w-full bg-slate-200 rounded-full h-2 mb-4 overflow-hidden">
+                        <div class="h-2 rounded-full {% if sub_acc >= 75 %}bg-emerald-500{% elif sub_acc >= 50 %}bg-blue-500{% else %}bg-amber-500{% endif %}"
+                             style="width: {{ sub_acc }}%"></div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-3 gap-1 text-center text-[11px] pt-3 border-t border-slate-200">
+                    <div>
+                        <span class="text-slate-400 block text-[10px]">Correct</span>
+                        <span class="font-bold text-emerald-600">{{ sub.correct_count }}</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 block text-[10px]">Wrong</span>
+                        <span class="font-bold text-rose-600">{{ sub.wrong_count }}</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 block text-[10px]">Skipped</span>
+                        <span class="font-bold text-slate-500">{{ sub.unanswered_count }}</span>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Navigation & Next Steps Footer -->
+    <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4">
+        <a href="{{ url_for('dashboard') }}" class="w-full sm:w-auto px-5 py-2.5 text-center bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl border border-slate-300 transition-colors">
+            ← Back to Dashboard
+        </a>
+        <div class="flex items-center space-x-3 w-full sm:w-auto">
+            <a href="{{ url_for('analytics') }}" class="flex-1 sm:flex-none px-5 py-2.5 text-center bg-white hover:bg-slate-50 text-blue-600 text-xs font-bold rounded-xl border border-blue-200 shadow-sm transition-colors">
+                View Performance Analytics
+            </a>
+            <a href="{{ url_for('test_review', attempt_id=attempt.id) }}" class="flex-1 sm:flex-none px-6 py-2.5 text-center bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl shadow-md transition-colors flex items-center justify-center space-x-1.5">
+                <span>Detailed Question Review</span>
+                <i class="fa-solid fa-arrow-right text-[10px]"></i>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

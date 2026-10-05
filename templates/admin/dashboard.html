@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Control Panel - SSC CGL Portal{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    
+    <!-- Admin Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+        <div>
+            <div class="flex items-center space-x-2 text-xs font-bold text-amber-600 uppercase tracking-wider mb-1">
+                <i class="fa-solid fa-shield-halved"></i>
+                <span>Super Administrator Portal</span>
+            </div>
+            <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">
+                Administration & Question Bank
+            </h1>
+            <p class="text-xs sm:text-sm text-slate-600 mt-1">
+                Configure papers, manage question database, import/export bulk items, and inspect aspirant test analytics.
+            </p>
+        </div>
+
+        <div class="flex items-center space-x-2">
+            <a href="{{ url_for('admin_papers') }}" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl shadow-sm transition-colors flex items-center space-x-1.5">
+                <i class="fa-solid fa-plus text-xs"></i>
+                <span>Manage Papers</span>
+            </a>
+            <a href="{{ url_for('admin_questions') }}" class="px-4 py-2 bg-ssc-900 hover:bg-ssc-800 text-white text-xs font-bold rounded-xl shadow-sm transition-colors flex items-center space-x-1.5">
+                <i class="fa-solid fa-database text-xs"></i>
+                <span>Question Bank</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Admin Top Stats (Section 15: View overall statistics) -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+            <div>
+                <span class="text-xs text-slate-500 font-medium block">Total Shift Papers</span>
+                <span class="text-2xl font-black text-slate-900 mt-1 block">{{ total_papers }}</span>
+                <span class="text-[11px] text-blue-600 font-semibold block mt-0.5">Year-Wise Archive</span>
+            </div>
+            <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-lg">
+                <i class="fa-solid fa-folder-open"></i>
+            </div>
+        </div>
+
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+            <div>
+                <span class="text-xs text-slate-500 font-medium block">Question Bank</span>
+                <span class="text-2xl font-black text-emerald-600 mt-1 block">{{ total_questions }}</span>
+                <span class="text-[11px] text-emerald-700 font-semibold block mt-0.5">MCQ Items</span>
+            </div>
+            <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg">
+                <i class="fa-solid fa-circle-question"></i>
+            </div>
+        </div>
+
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+            <div>
+                <span class="text-xs text-slate-500 font-medium block">Registered Aspirants</span>
+                <span class="text-2xl font-black text-purple-600 mt-1 block">{{ total_students }}</span>
+                <span class="text-[11px] text-purple-700 font-semibold block mt-0.5">Student Accounts</span>
+            </div>
+            <div class="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-lg">
+                <i class="fa-solid fa-users"></i>
+            </div>
+        </div>
+
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+            <div>
+                <span class="text-xs text-slate-500 font-medium block">Total Tests Taken</span>
+                <span class="text-2xl font-black text-amber-600 mt-1 block">{{ total_attempts }}</span>
+                <span class="text-[11px] text-amber-700 font-semibold block mt-0.5">Completed Sessions</span>
+            </div>
+            <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-lg">
+                <i class="fa-solid fa-clipboard-check"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Navigation Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <a href="{{ url_for('admin_papers') }}" class="p-6 bg-white rounded-2xl border border-slate-200 shadow-sm hover:border-blue-400 hover:shadow-md transition-all group">
+            <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center text-lg mb-4 group-hover:scale-105 transition-transform">
+                <i class="fa-solid fa-file-pen"></i>
+            </div>
+            <h3 class="font-bold text-slate-900 text-base mb-1">Paper & Shift Management</h3>
+            <p class="text-xs text-slate-500 leading-relaxed">
+                Add new years, create shifts (Shift 1, 2, 3), set duration, configure +2 marks per question and negative marking penalties (-0.50).
+            </p>
+        </a>
+
+        <a href="{{ url_for('admin_questions') }}" class="p-6 bg-white rounded-2xl border border-slate-200 shadow-sm hover:border-emerald-400 hover:shadow-md transition-all group">
+            <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-lg mb-4 group-hover:scale-105 transition-transform">
+                <i class="fa-solid fa-file-circle-plus"></i>
+            </div>
+            <h3 class="font-bold text-slate-900 text-base mb-1">Question Entry & Bulk Import</h3>
+            <p class="text-xs text-slate-500 leading-relaxed">
+                Add questions with options A-D, correct answers, step-by-step solutions, or import in bulk using CSV/JSON formatted files.
+            </p>
+        </a>
+
+        <a href="{{ url_for('admin_users') }}" class="p-6 bg-white rounded-2xl border border-slate-200 shadow-sm hover:border-purple-400 hover:shadow-md transition-all group">
+            <div class="w-10 h-10 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center text-lg mb-4 group-hover:scale-105 transition-transform">
+                <i class="fa-solid fa-user-gear"></i>
+            </div>
+            <h3 class="font-bold text-slate-900 text-base mb-1">User Directory & Attempts</h3>
+            <p class="text-xs text-slate-500 leading-relaxed">
+                Review candidate accounts, monitor exam progress, inspect individual test scorecards, and audit portal usage.
+            </p>
+        </a>
+    </div>
+
+    <!-- Recent Candidate Test Attempts Table -->
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="p-6 border-b border-slate-100 flex items-center justify-between">
+            <div>
+                <h3 class="font-bold text-slate-900 text-base">Live Candidate Activity</h3>
+                <p class="text-xs text-slate-500">Recent completed mock test submissions</p>
+            </div>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs sm:text-sm">
+                <thead>
+                    <tr class="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold uppercase tracking-wider text-[11px]">
+                        <th class="p-4">Candidate</th>
+                        <th class="p-4">Paper Title</th>
+                        <th class="p-4 text-center">Score</th>
+                        <th class="p-4 text-center">Percentage</th>
+                        <th class="p-4 text-center">Accuracy</th>
+                        <th class="p-4 text-center">Timestamp</th>
+                        <th class="p-4 text-right">Inspect</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    {% for att in recent_attempts %}
+                    <tr class="hover:bg-slate-50/70 transition-colors">
+                        <td class="p-4">
+                            <span class="font-bold text-slate-900 block">{{ att.user_name }}</span>
+                            <span class="text-[11px] text-slate-400 font-mono">@{{ att.username }}</span>
+                        </td>
+                        <td class="p-4 font-medium text-slate-800">
+                            {{ att.paper_title }}
+                        </td>
+                        <td class="p-4 text-center font-bold text-slate-900">
+                            {{ att.final_score }} / {{ att.max_marks }}
+                        </td>
+                        <td class="p-4 text-center font-extrabold {% if att.percentage >= 75 %}text-emerald-600{% elif att.percentage >= 50 %}text-blue-600{% else %}text-amber-600{% endif %}">
+                            {{ att.percentage }}%
+                        </td>
+                        <td class="p-4 text-center font-bold text-slate-700">
+                            {{ att.accuracy }}%
+                        </td>
+                        <td class="p-4 text-center font-mono text-xs text-slate-500">
+                            {{ att.start_time[:16] }}
+                        </td>
+                        <td class="p-4 text-right">
+                            <a href="{{ url_for('test_result', attempt_id=att.id) }}" class="px-2.5 py-1 bg-slate-100 hover:bg-blue-50 hover:text-blue-600 text-slate-700 rounded-lg text-xs font-semibold">
+                                View Result
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

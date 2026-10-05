@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}User Profile - SSC CGL Portal{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <!-- Top Profile Banner -->
+        <div class="p-6 sm:p-8 bg-gradient-to-r from-ssc-900 to-slate-800 text-white flex items-center space-x-4">
+            <div class="w-16 h-16 rounded-2xl bg-blue-600 flex items-center justify-center font-extrabold text-2xl text-white shadow-md uppercase">
+                {{ user.username[0] }}
+            </div>
+            <div>
+                <h1 class="text-2xl font-bold">{{ user.full_name }}</h1>
+                <p class="text-xs text-slate-300">@{{ user.username }} • {{ user.email }}</p>
+                <div class="mt-2 flex items-center space-x-2">
+                    <span class="px-2.5 py-0.5 rounded-full bg-blue-500/20 text-blue-200 border border-blue-400/30 text-xs font-semibold">
+                        Role: {{ user.role|upper }}
+                    </span>
+                    <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 text-xs font-semibold">
+                        Target: SSC CGL {{ user.target_year or 2025 }}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Profile Stats -->
+        <div class="grid grid-cols-3 divide-x divide-slate-100 border-b border-slate-200 bg-slate-50/50 p-4 text-center">
+            <div>
+                <span class="text-slate-400 text-xs block">Tests Completed</span>
+                <span class="font-extrabold text-slate-900 text-lg">{{ stats.total_attempts or 0 }}</span>
+            </div>
+            <div>
+                <span class="text-slate-400 text-xs block">Highest Score</span>
+                <span class="font-extrabold text-emerald-600 text-lg">{{ stats.best_score or 0 }}</span>
+            </div>
+            <div>
+                <span class="text-slate-400 text-xs block">Avg Percentage</span>
+                <span class="font-extrabold text-blue-600 text-lg">{{ "%.1f"|format(stats.avg_pct or 0) }}%</span>
+            </div>
+        </div>
+
+        <!-- Edit Profile Form -->
+        <div class="p-6 sm:p-8">
+            <h3 class="font-bold text-slate-900 text-base mb-4">Edit Profile Settings</h3>
+            <form action="{{ url_for('profile') }}" method="POST" class="space-y-4 max-w-lg">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Full Name</label>
+                    <input type="text" name="full_name" value="{{ user.full_name }}" required
+                           class="w-full px-3.5 py-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-600">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Username (Fixed)</label>
+                    <input type="text" value="{{ user.username }}" disabled
+                           class="w-full px-3.5 py-2.5 border border-slate-200 bg-slate-100 text-slate-500 rounded-lg text-sm">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Email Address (Fixed)</label>
+                    <input type="email" value="{{ user.email }}" disabled
+                           class="w-full px-3.5 py-2.5 border border-slate-200 bg-slate-100 text-slate-500 rounded-lg text-sm">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Target Exam Year</label>
+                    <select name="target_year" class="w-full px-3.5 py-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-600">
+                        <option value="2025" {% if user.target_year == 2025 %}selected{% endif %}>SSC CGL 2025</option>
+                        <option value="2026" {% if user.target_year == 2026 %}selected{% endif %}>SSC CGL 2026</option>
+                        <option value="2024" {% if user.target_year == 2024 %}selected{% endif %}>SSC CGL 2024</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Change Password (Leave blank to keep current)</label>
+                    <input type="password" name="new_password" placeholder="New password" minlength="6"
+                           class="w-full px-3.5 py-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-600">
+                </div>
+
+                <div class="pt-3">
+                    <button type="submit" class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl shadow-sm transition-colors">
+                        Save Profile Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
