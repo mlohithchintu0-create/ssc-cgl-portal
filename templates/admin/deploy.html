@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block title %}Cloud Deployment & GitHub Sync - Admin Portal{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    
+    <!-- Breadcrumb & Header -->
+    <div class="mb-8">
+        <nav class="flex items-center space-x-2 text-xs text-slate-500 mb-2">
+            <a href="{{ url_for('admin_dashboard') }}" class="hover:text-blue-600">Admin</a>
+            <span>/</span>
+            <span class="text-slate-800 font-semibold">Cloud Deployment</span>
+        </nav>
+        <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">
+            Deploy to GitHub & Render (24/7 Cloud URL)
+        </h1>
+        <p class="text-xs sm:text-sm text-slate-600 mt-1">
+            Push your complete SSC CGL web application directly to your GitHub repository and host it 24/7 on Render.com.
+        </p>
+    </div>
+
+    <!-- Main Card -->
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 sm:p-8 mb-8">
+        <div class="flex items-center space-x-3 mb-6 pb-4 border-b border-slate-100">
+            <div class="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center text-xl">
+                <i class="fa-brands fa-github"></i>
+            </div>
+            <div>
+                <h3 class="font-bold text-slate-900 text-base">Push to GitHub Repository</h3>
+                <p class="text-xs text-slate-500">Pure-Python automated commit and push (no local git command required)</p>
+            </div>
+        </div>
+
+        <form action="{{ url_for('admin_deploy') }}" method="POST" class="space-y-5">
+            <div>
+                <label for="repo_url" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
+                    GitHub Repository Clone URL
+                </label>
+                <div class="relative rounded-md shadow-sm">
+                    <input type="url" name="repo_url" id="repo_url" required
+                           value="https://github.com/mlohithchintu0/ssc-cgl-portal.git"
+                           class="w-full px-3.5 py-2.5 border border-slate-300 rounded-lg text-sm font-mono focus:ring-2 focus:ring-blue-600 focus:border-blue-600">
+                </div>
+                <p class="text-[11px] text-slate-400 mt-1">
+                    Matches your GitHub repository: <code>https://github.com/mlohithchintu0/ssc-cgl-portal.git</code>
+                </p>
+            </div>
+
+            <div>
+                <div class="flex items-center justify-between mb-1">
+                    <label for="token" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider">
+                        GitHub Personal Access Token (Classic)
+                    </label>
+                    <a href="https://github.com/settings/tokens/new?scopes=repo&description=SSC-CGL-Deploy" target="_blank"
+                       class="text-xs text-blue-600 hover:text-blue-700 font-bold hover:underline flex items-center space-x-1">
+                        <span>Generate Token on GitHub</span>
+                        <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                    </a>
+                </div>
+                <div class="relative rounded-md shadow-sm">
+                    <input type="password" name="token" id="token" required
+                           placeholder="ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                           class="w-full px-3.5 py-2.5 border border-slate-300 rounded-lg text-sm font-mono focus:ring-2 focus:ring-blue-600 focus:border-blue-600">
+                </div>
+                <div class="mt-2 bg-blue-50/70 border border-blue-200 rounded-lg p-3 text-xs text-blue-950">
+                    <p class="font-bold text-blue-900 mb-1">How to get your token in 10 seconds:</p>
+                    <ol class="list-decimal pl-4 space-y-1 text-slate-700">
+                        <li>Click the <a href="https://github.com/settings/tokens/new?scopes=repo&description=SSC-CGL-Deploy" target="_blank" class="font-bold text-blue-600 underline">Generate Token link</a>.</li>
+                        <li>Check the <strong>repo</strong> checkbox (Full control of private repositories).</li>
+                        <li>Click <strong>Generate token</strong> at the bottom of the page and paste it above.</li>
+                    </ol>
+                </div>
+            </div>
+
+            <div class="pt-2">
+                <button type="submit" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm font-bold rounded-xl shadow-md transition-all flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-cloud-arrow-up text-sm"></i>
+                    <span>Push Entire Project to GitHub</span>
+                </button>
+            </div>
+        </form>
+
+        {% if result_msg %}
+        <div class="mt-6 p-4 rounded-xl border text-xs leading-relaxed {% if is_success %}bg-emerald-50 border-emerald-300 text-emerald-950{% else %}bg-rose-50 border-rose-300 text-rose-950{% endif %}">
+            <div class="font-bold mb-1 flex items-center space-x-2">
+                {% if is_success %}
+                <i class="fa-solid fa-circle-check text-emerald-600 text-base"></i>
+                <span>Push Completed Successfully!</span>
+                {% else %}
+                <i class="fa-solid fa-circle-xmark text-rose-600 text-base"></i>
+                <span>Push Warning / Error</span>
+                {% endif %}
+            </div>
+            <p>{{ result_msg }}</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Render.com 24/7 Hosting Instructions Card -->
+    <div class="bg-gradient-to-br from-slate-900 to-ssc-900 text-white rounded-2xl p-6 sm:p-8 shadow-sm">
+        <div class="flex items-center space-x-3 mb-4">
+            <span class="w-10 h-10 rounded-xl bg-blue-500/20 text-blue-300 border border-blue-400/30 flex items-center justify-center text-lg">
+                <i class="fa-solid fa-server"></i>
+            </span>
+            <div>
+                <h3 class="font-bold text-lg">Final Step: Launch on Render.com</h3>
+                <p class="text-xs text-slate-300">Free 24/7 permanent HTTPS link</p>
+            </div>
+        </div>
+
+        <ol class="list-decimal pl-4 space-y-3 text-xs sm:text-sm text-slate-200 mt-4 leading-relaxed">
+            <li>
+                Go to <a href="https://dashboard.render.com" target="_blank" class="text-blue-400 font-bold underline">dashboard.render.com</a> and click <strong>New +</strong> &gt; <strong>Web Service</strong>.
+            </li>
+            <li>
+                Connect your GitHub repository <code>mlohithchintu0/ssc-cgl-portal</code>.
+            </li>
+            <li>
+                Render automatically detects the included <code>render.yaml</code> and <code>Procfile</code>:
+                <div class="mt-2 bg-slate-800/80 rounded-lg p-3 font-mono text-xs text-slate-300 space-y-1">
+                    <div><strong>Runtime:</strong> Python 3</div>
+                    <div><strong>Build Command:</strong> pip install -r requirements.txt && python seed_data.py</div>
+                    <div><strong>Start Command:</strong> gunicorn app:app --workers 2 --threads 4 --timeout 120</div>
+                </div>
+            </li>
+            <li>
+                Click <strong>Create Web Service</strong>. In ~60 seconds, your permanent live link (e.g. <code>https://ssc-cgl-portal.onrender.com</code>) will be active 24/7!
+            </li>
+        </ol>
+    </div>
+
+</div>
+{% endblock %}

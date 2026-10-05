@@ -1384,8 +1384,30 @@ def admin_users():
     """)
     users = cursor.fetchall()
     conn.close()
-
     return render_template('admin/users.html', users=users)
+
+@app.route('/admin/deploy', methods=['GET', 'POST'])
+@admin_required
+def admin_deploy():
+    result_msg = None
+    is_success = False
+    if request.method == 'POST':
+        repo_url = request.form.get('repo_url', '').strip()
+        token = request.form.get('token', '').strip()
+
+        if not repo_url:
+            flash('Please enter your GitHub repository URL.', 'danger')
+        else:
+            from deploy_push import push_to_remote
+            success, msg = push_to_remote(repo_url, token=token)
+            is_success = success
+            result_msg = msg
+            if success:
+                flash('Repository pushed to GitHub successfully! Now link it to Render.', 'success')
+            else:
+                flash(f'Push error: {msg}', 'danger')
+
+    return render_template('admin/deploy.html', result_msg=result_msg, is_success=is_success)
 
 # Auto-initialize database on application startup (works with both Gunicorn and direct python app.py)
 with app.app_context():
