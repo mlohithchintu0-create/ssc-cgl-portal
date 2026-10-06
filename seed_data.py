@@ -609,7 +609,16 @@ def seed():
 
     conn.commit()
     conn.close()
+
+    # Also populate all additional questions across Model Papers and Shifts
+    try:
+        from populate_all_questions import populate
+        populate()
+    except Exception as e:
+        print(f"Error populating extra questions: {e}")
+
     print("Database seeded with papers, authentic questions, users, and sample attempt.")
 
 if __name__ == '__main__':
     seed()
+
